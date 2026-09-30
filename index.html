@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bengaluru trip dashboard, Oct 2–5, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{
+  --paper:#F2F4F0; --surface:#FFFFFF; --sunk:#E8ECE6;
+  --ink:#1C2A28; --muted:#5A6866; --line:#D5DCD5;
+  --green:#1D7A4B; --green-soft:#E2F0E7;
+  --purple:#6B3FA0; --purple-soft:#EEE7F6;
+  --blue:#1C66AE; --blue-soft:#E3EEF8;
+  --marigold:#B87A06; --marigold-soft:#FBEFD2;
+  --red:#AE2A20; --red-soft:#FAE3E0;
+  --radius-lg:14px; --radius-sm:6px;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121917; --surface:#1A2321; --sunk:#222D2A;
+    --ink:#E6ECE8; --muted:#9DABA7; --line:#2E3A37;
+    --green:#4CC285; --green-soft:#16362A;
+    --purple:#B28BE0; --purple-soft:#2C2240;
+    --blue:#6FAEE8; --blue-soft:#172C40;
+    --marigold:#F0B53A; --marigold-soft:#3A2D10;
+    --red:#F07C70; --red-soft:#3D1D1A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121917; --surface:#1A2321; --sunk:#222D2A;
+  --ink:#E6ECE8; --muted:#9DABA7; --line:#2E3A37;
+  --green:#4CC285; --green-soft:#16362A;
+  --purple:#B28BE0; --purple-soft:#2C2240;
+  --blue:#6FAEE8; --blue-soft:#172C40;
+  --marigold:#F0B53A; --marigold-soft:#3A2D10;
+  --red:#F07C70; --red-soft:#3D1D1A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+a{color:var(--blue)}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.15;margin:0}
+h2{font-size:clamp(1.5rem,2.6vw,2rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+h4{font-size:1rem;font-weight:700}
+p{margin:.4rem 0 .8rem;max-width:72ch}
+small,.small{font-size:.86rem}
+.muted{color:var(--muted)}
+
+/* ---------- layout ---------- */
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-right:1px solid var(--line);padding:22px 18px 30px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.25rem;line-height:1.1;margin-bottom:4px}
+.brand-sub{color:var(--muted);font-size:.85rem;margin-bottom:18px}
+.side nav ol{list-style:none;margin:0;padding:0;counter-reset:n}
+.side nav li{counter-increment:n}
+.side nav a{display:flex;gap:10px;align-items:baseline;padding:7px 8px;border-radius:var(--radius-sm);color:var(--ink);text-decoration:none;font-size:.95rem}
+.side nav a::before{content:counter(n);font-family:var(--display);font-weight:700;color:var(--muted);font-size:.8rem;min-width:1.4em;text-align:right}
+.side nav a:hover{background:var(--sunk)}
+.side nav a.active{background:var(--green-soft);color:var(--green);font-weight:700}
+.theme-btn{margin-top:18px;width:100%}
+main{padding:28px clamp(16px,4vw,48px) 80px;max-width:1180px}
+section{padding:34px 0 18px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.sec-head p{margin:.3rem 0 0}
+
+@media (max-width: 900px){
+  .shell{display:block}
+  .side{position:sticky;top:0;z-index:1000;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .brand-sub,.theme-btn{display:none}
+  .brand{font-size:1rem;margin-bottom:6px}
+  .side nav ol{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .side nav ol::-webkit-scrollbar{display:none}
+  .side nav a{white-space:nowrap;padding:6px 10px;font-size:.88rem;background:var(--sunk)}
+  .side nav a::before{display:none}
+  main{padding-top:14px}
+}
+
+/* ---------- generic pieces ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap;line-height:1.6}
+.b-green{background:var(--green-soft);color:var(--green)}
+.b-amber{background:var(--marigold-soft);color:var(--marigold)}
+.b-red{background:var(--red-soft);color:var(--red)}
+.b-blue{background:var(--blue-soft);color:var(--blue)}
+.b-grey{background:var(--sunk);color:var(--muted)}
+.b-purple{background:var(--purple-soft);color:var(--purple)}
+.callout{border-left:4px solid var(--marigold);background:var(--marigold-soft);padding:12px 16px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:12px 0}
+.callout.red{border-color:var(--red);background:var(--red-soft)}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout p{margin:.2rem 0}
+button,.btn{font:inherit;font-weight:700;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+button:hover{background:var(--sunk)}
+.kv{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:4px 14px;font-size:.93rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+details>summary{cursor:pointer;font-weight:700}
+ul.tight{margin:.3rem 0;padding-left:1.2rem}
+ul.tight li{margin:.2rem 0}
+
+/* ---------- overview hero ---------- */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:stretch}
+@media (max-width:900px){.hero{grid-template-columns:1fr}}
+.route{background:var(--ink);color:var(--paper);border-radius:var(--radius-lg);padding:24px;position:relative;overflow:hidden}
+.route h1{font-size:clamp(2.1rem,5vw,3.3rem);font-weight:800;letter-spacing:-.02em}
+.route .codes{display:flex;align-items:center;gap:14px;margin:6px 0 16px}
+.route .codes span{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,6vw,3.6rem);letter-spacing:.02em}
+.route .track{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--blue) 0 33%,var(--green) 33% 66%,var(--purple) 66%)}
+.route dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0;font-size:.95rem}
+.route dt{opacity:.7}
+.route dd{margin:0;font-weight:700}
+.nights{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.night{border-radius:10px;padding:10px;text-align:center;font-size:.85rem}
+.night b{display:block;font-family:var(--display);font-size:1.05rem}
+.n-in{background:var(--blue-soft);color:var(--blue)}
+.n-stay{background:var(--green-soft);color:var(--green)}
+.n-out{background:var(--sunk);color:var(--muted)}
+
+/* ---------- metro-line timelines (the one bold element) ---------- */
+.line{--c:var(--green);--soft:var(--green-soft);position:relative;margin:8px 0 0;padding:0;list-style:none}
+.line.blue{--c:var(--blue);--soft:var(--blue-soft)}
+.line.purple{--c:var(--purple);--soft:var(--purple-soft)}
+.line::before{content:"";position:absolute;left:94px;top:10px;bottom:10px;width:8px;border-radius:4px;background:var(--c)}
+.stop{position:relative;display:grid;grid-template-columns:70px 36px 1fr;gap:0 10px;padding:6px 0 14px}
+.stop .t{font-family:var(--display);font-weight:700;text-align:right;padding-top:2px;font-size:.95rem;color:var(--muted)}
+.stop .dot{width:26px;height:26px;border-radius:50%;background:var(--surface);border:6px solid var(--c);margin:0 auto;z-index:1;position:relative}
+.stop.interchange .dot{width:30px;height:30px;border-width:4px;box-shadow:0 0 0 4px var(--surface), 0 0 0 7px var(--c)}
+.stop.optional .dot{border-style:dashed;border-width:4px}
+.stop .body{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stop .body h4{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stop .body p{margin:.25rem 0}
+.stop .legs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.stop .legs a{font-size:.83rem;font-weight:700;text-decoration:none;background:var(--soft);color:var(--c);padding:3px 10px;border-radius:999px}
+@media (max-width:560px){
+  .line::before{left:69px}
+  .stop{grid-template-columns:50px 30px 1fr;gap:0 8px}
+  .stop .t{font-size:.8rem}
+}
+
+/* ---------- map ---------- */
+#map{height:520px;border-radius:var(--radius-lg);border:1px solid var(--line);background:var(--sunk)}
+@media (max-width:700px){#map{height:420px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;font-size:.88rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.leaflet-popup-content{font-family:var(--body)}
+
+/* ---------- hotel table ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.88rem;font-weight:700;cursor:pointer;user-select:none}
+.chip input{accent-color:var(--green);margin:0}
+.chip:has(input:checked){background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.toggle{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--sunk);font-weight:700;cursor:pointer;margin:6px 0}
+.toggle input{width:20px;height:20px;accent-color:var(--green)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:1180px;font-size:.88rem}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--sunk);font-family:var(--display);font-weight:700;font-size:.85rem;white-space:nowrap}
+td:first-child,th:first-child{position:sticky;left:0;background:var(--surface);z-index:1;min-width:190px}
+th:first-child{background:var(--sunk);z-index:2}
+tbody tr:hover td{background:var(--sunk)}
+td a.hname{font-weight:700;color:var(--ink);text-decoration:none}
+td a.hname:hover{text-decoration:underline}
+.empty{padding:18px;background:var(--marigold-soft);border-radius:var(--radius-sm);margin:10px 0}
+.count{font-size:.9rem;color:var(--muted);margin:6px 0}
+
+/* ---------- hotel cards ---------- */
+.group-title{margin:26px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;scroll-margin-top:90px}
+.hcard.avoid{border-color:var(--red)}
+.hcard .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.hcard .top h3{max-width:42ch}
+.hcard .tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.hcard .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px 22px;margin-top:10px}
+.hcard h4{font-size:.9rem;color:var(--muted);margin:0 0 4px;font-weight:700}
+.policy{display:grid;grid-template-columns:1fr;gap:6px}
+.pol{display:grid;grid-template-columns:minmax(150px,max-content) 1fr;gap:8px;font-size:.9rem;align-items:start}
+.pol .k{color:var(--muted)}
+.ratings{display:flex;flex-wrap:wrap;gap:6px}
+.rating{border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:.85rem}
+.rating b{font-family:var(--display)}
+.srcs{font-size:.84rem;display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px}
+.callflag{display:inline-flex;gap:6px;align-items:center;background:var(--red);color:#fff;font-weight:700;border-radius:999px;padding:3px 11px;font-size:.8rem}
+:root[data-theme="dark"] .callflag{color:#1A0F0E}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .callflag{color:#1A0F0E}}
+
+/* ---------- food ---------- */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px 18px}
+.fcard .meta{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#foodPanel{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+@media (max-width:560px){#foodPanel{grid-template-columns:1fr}}
+.fcard .kv{grid-template-columns:104px 1fr}
+.fcard .badge,.hcard .badge{white-space:normal}
+.kv dt{font-size:.88rem}
+
+/* ---------- checklists ---------- */
+.check{list-style:none;padding:0;margin:0}
+.check li{border-bottom:1px solid var(--line)}
+.check label{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--green);flex:none}
+.check input:checked + span{color:var(--muted);text-decoration:line-through}
+.check span small{display:block;text-decoration:none;color:var(--muted)}
+
+/* ---------- calculator ---------- */
+.calc{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.calc input{font:inherit;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.calc-out{margin-top:12px;font-size:1rem}
+.calc-out b{font-family:var(--display);font-size:1.3rem}
+
+.sources h3{margin-top:20px}
+.sources ul{padding-left:1.1rem}
+.sources li{margin:.3rem 0;font-size:.9rem}
+footer{color:var(--muted);font-size:.85rem;padding:30px 0}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">Bengaluru, Oct 2–5</div>
+    <div class="brand-sub">Personal trip dashboard. Research pass: Oct 1, 2026.</div>
+    <nav aria-label="Sections">
+      <ol>
+        <li><a href="#overview">Trip overview</a></li>
+        <li><a href="#friday">Friday timeline</a></li>
+        <li><a href="#map-sec">Area map</a></li>
+        <li><a href="#compare">Hotel comparison</a></li>
+        <li><a href="#hotels">Hotel details</a></li>
+        <li><a href="#policy">Policy &amp; questions</a></li>
+        <li><a href="#saturday">Saturday plan</a></li>
+        <li><a href="#sunday">Sunday plan</a></li>
+        <li><a href="#food">Food guide</a></li>
+        <li><a href="#places">Places to visit</a></li>
+        <li><a href="#transport">Airport transport</a></li>
+        <li><a href="#booking">Booking checklist</a></li>
+        <li><a href="#decide">Still to decide</a></li>
+        <li><a href="#sources">Sources</a></li>
+      </ol>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button">Switch light/dark</button>
+  </aside>
+
+<main id="top">
+
+<!-- ===================== 1. OVERVIEW ===================== -->
+<section id="overview" style="padding-top:6px">
+  <div class="hero">
+    <div class="route">
+      <h1>Delhi to Bengaluru</h1>
+      <div class="codes" aria-label="DEL to BLR"><span>DEL</span><div class="track" aria-hidden="true"></div><span>BLR</span></div>
+      <dl>
+        <dt>Dates</dt><dd>Fri Oct 2 → Mon Oct 5, 2026</dd>
+        <dt>Hotel</dt><dd>3 nights, not booked yet</dd>
+        <dt>Main base</dt><dd>ISKCON / Rajajinagar / Yeshwanthpur / Malleshwaram belt</dd>
+        <dt>Hotel target</dt><dd>₹1,000–2,000 per night</dd>
+        <dt>Outbound</dt><dd>IndiGo 6E 826, 09:30 → 12:25, DEL T1 → BLR T1, booked</dd>
+        <dt>Return</dt><dd>Monday, not booked yet</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h3>How your hotel nights work</h3>
+      <p class="small">Check in Oct 2, check out Oct 5 = <b>3 nights</b>. You pay for nights, not days.</p>
+      <div class="nights" role="list">
+        <div class="night n-in" role="listitem"><b>Fri</b>Arrive ~14:00–15:00<br>Night 1</div>
+        <div class="night n-stay" role="listitem"><b>Sat</b>Full day<br>Night 2</div>
+        <div class="night n-stay" role="listitem"><b>Sun</b>Full day<br>Night 3</div>
+        <div class="night n-out" role="listitem"><b>Mon</b>Check out<br>No night</div>
+      </div>
+      <details style="margin-top:12px">
+        <summary>Check-in, checkout, early/late, and day-use explained</summary>
+        <ul class="tight small">
+          <li><b>Normal overnight booking</b> (what you want): a room from the check-in time on Oct 2 until the checkout time on Oct 5.</li>
+          <li><b>Check-in time</b> is usually 12 PM–3 PM. If yours is 12 PM, arriving at 2–3 PM is fine; the room should be ready.</li>
+          <li><b>If check-in is 2 PM or 3 PM</b> and you arrive earlier, you may have to wait or pay for early check-in. Ask when you call.</li>
+          <li><b>Checkout</b> is usually 10 AM, 11 AM or 12 PM on Monday. If your return flight is late, ask about late checkout or leave bags at reception.</li>
+          <li><b>Day-use / hourly hotels</b> (sold in 3–12 hour slots) are <em>not</em> what you're looking for. Don't book an ‘hourly’ rate by mistake on OYO, Brevistay or Bag2Bag.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:16px">
+    <p><b>Fri Oct 2 is Gandhi Jayanti</b>, a fixed national public holiday, and it starts a 3-day weekend. Expect larger crowds at ISKCON and higher hotel demand than a normal Friday. ISKCON uses its weekend/public-holiday timings (no afternoon closure). Gandhi Jayanti is also typically a dry day in India (no alcohol sales).</p>
+  </div>
+
+  <div class="grid g3" style="margin-top:14px">
+    <div class="panel">
+      <h4>Where the hotel search stands</h4>
+      <p class="small">Only two hotels pass everything except the female-visitor question: <a href="#h-thimmaiah">Super Hotel O Thimmaiah Rd</a> and <a href="#h-ramachandrapuram">Super Hotel O Ramachandrapuram</a>. Nobody publishes a visitor policy, so every hotel needs a phone call.</p>
+    </div>
+    <div class="panel">
+      <h4>Biggest risk</h4>
+      <p class="small">In January 2025 OYO gave partner hotels discretion to decline couple bookings. A “couples welcome” listing reduces the risk but doesn't remove it. Confirm by phone or WhatsApp before you pay.</p>
+    </div>
+    <div class="panel">
+      <h4>Reddit evidence</h4>
+      <p class="small"><b>Reddit evidence unavailable in this research pass.</b> My search tools could not retrieve Reddit threads. Community notes below come from review aggregators (Google-review summaries, Tripadvisor, booking sites) and are labelled as such.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. FRIDAY ===================== -->
+<section id="friday">
+  <div class="sec-head">
+    <div><h2>Friday, Oct 2</h2><p class="muted">Arrival day. Times after landing are estimates, not guarantees.</p></div>
+    <span class="badge b-blue">Airport line</span>
+  </div>
+  <ol class="line blue" id="friLine"></ol>
+</section>
+
+<!-- ===================== 3. MAP ===================== -->
+<section id="map-sec">
+  <div class="sec-head">
+    <div><h2>Area map</h2><p class="muted">Pins are approximate and meant for orientation. Tap a pin for a Google Maps link. Hotel pins are left out because exact coordinates weren't verified for most of them; each hotel card has its own Maps link.</p></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:#1C66AE"></i>Airport &amp; transport hubs</span>
+    <span><i style="background:#1D7A4B"></i>Metro stations</span>
+    <span><i style="background:#B87A06"></i>Temples &amp; sights</span>
+    <span><i style="background:#6B3FA0"></i>Neighbourhoods</span>
+    <span><i style="background:#AE2A20"></i>Food</span>
+  </div>
+  <div id="map" role="region" aria-label="Interactive map of Bengaluru trip locations"></div>
+  <div id="mapFallback" hidden></div>
+  <button type="button" id="fitCity" style="margin-top:10px">Zoom to ISKCON belt</button>
+  <button type="button" id="fitAll" style="margin-top:10px">Show airport too</button>
+</section>
+
+<!-- ===================== 4. COMPARISON ===================== -->
+<section id="compare">
+  <div class="sec-head">
+    <div>
+      <h2>Hotel comparison</h2>
+      <p class="muted">Prices are listing snapshots collected on Oct 1, 2026. The stay dates on those source pages were <b>not</b> Oct 2–5, so every price is <b>indicative — verify at checkout</b>.</p>
+    </div>
+  </div>
+
+  <label class="toggle"><input type="checkbox" id="meetsAll"> Show only hotels that meet ALL my requirements</label>
+  <div class="filters" id="filters" aria-label="Filters">
+    <label class="chip"><input type="checkbox" value="lt1500"> Under ₹1,500</label>
+    <label class="chip"><input type="checkbox" value="mid"> ₹1,500–2,000</label>
+    <label class="chip"><input type="checkbox" value="gt2000"> Over ₹2,000</label>
+    <label class="chip"><input type="checkbox" value="couple"> Couple friendly (listed)</label>
+    <label class="chip"><input type="checkbox" value="localid"> Local ID accepted (listed)</label>
+    <label class="chip"><input type="checkbox" value="cancel"> Free cancellation offered</label>
+    <label class="chip"><input type="checkbox" value="iskcon"> Near ISKCON (≤2 km, sourced)</label>
+    <label class="chip"><input type="checkbox" value="metro"> Near Metro (≤1 km, sourced)</label>
+    <label class="chip"><input type="checkbox" value="reviews"> Strong reviews</label>
+    <button type="button" id="clearFilters">Clear filters</button>
+  </div>
+  <div id="emptyMsg"></div>
+  <div class="count" id="count"></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th scope="col">Hotel</th><th scope="col">Area</th><th scope="col">Price/night</th><th scope="col">3-night total</th>
+        <th scope="col">Rating</th><th scope="col">Reviews</th><th scope="col">Couple</th><th scope="col">Local ID</th>
+        <th scope="col">Visitor policy</th><th scope="col">ISKCON</th><th scope="col">Metro</th><th scope="col">Cancellation</th><th scope="col">Confidence</th>
+      </tr></thead>
+      <tbody id="hotelRows"></tbody>
+    </table>
+  </div>
+  <p class="small muted">“Strong reviews” means a good score on a large review count without a serious contradiction on another platform. A single-platform score counts, but it's flagged. “Listed” means a booking platform or the hotel says so explicitly; nothing is counted as listed if it's only my inference.</p>
+</section>
+
+<!-- ===================== 5. HOTEL DETAILS ===================== -->
+<section id="hotels">
+  <div class="sec-head"><div><h2>Hotel details</h2><p class="muted">Grouped by how well each fits your brief. Each card separates what a source says from what I infer.</p></div></div>
+  <div id="hotelCards"></div>
+</section>
+
+<!-- ===================== 6. POLICY ===================== -->
+<section id="policy">
+  <div class="sec-head"><div><h2>Policy &amp; questions to ask</h2><p class="muted">Four different things that are easy to mix up.</p></div></div>
+  <div class="grid g2">
+    <div class="panel">
+      <h3>These are not the same</h3>
+      <dl class="kv" style="margin-top:10px">
+        <dt>Couple friendly</dt><dd>A marketing tag. Usually means the hotel doesn't turn couples away, but it's not a contract.</dd>
+        <dt>Unmarried couples accepted</dt><dd>An explicit check-in policy. OYO lets partner hotels decline couples at their discretion (since Jan 2025), so even this can change at the desk.</dd>
+        <dt>Local ID accepted</dt><dd>Whether someone with a Bengaluru/Karnataka address on their ID can check in. Some hotels only accept non-local guests.</dd>
+        <dt>Day visitors allowed</dt><dd>Whether a friend who isn't registered can come to your room. <b>No hotel on this list states its policy.</b></dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h3>What's typical for visitors (general, not hotel-specific)</h3>
+      <p class="small">A travel-booking guide from ixigo says visitors are usually allowed roughly between 10 AM and 8 PM, must register at reception with a valid ID, and can be refused at the hotel's discretion. An overnight visitor usually has to be added as a guest, sometimes for a fee.</p>
+      <p class="small muted">That's a general pattern, not a policy of any hotel here. If she might stay the night, the cleanest option is to book for 2 guests and register both of you at check-in.</p>
+      <div class="callout red"><p><b>Real refusals happen.</b> Guests on Quora and review sites describe hotels refusing check-in even after an OYO booking, including one who had phoned ahead. Always carry original ID, and have a backup hotel in mind.</p></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <div class="sec-head" style="margin-bottom:6px"><h3>Call / WhatsApp script</h3><button type="button" id="copyScript">Copy script</button></div>
+    <ol id="script" class="tight">
+      <li>We're two adults, unmarried. Will you check us in for Oct 2 to Oct 5, three nights?</li>
+      <li>One of us has a Bengaluru/Karnataka address on our ID. Is local ID accepted?</li>
+      <li>Which IDs do you accept? Aadhaar, driving licence, passport, voter ID? Is PAN accepted?</li>
+      <li>Can a friend visit my room during the day without staying overnight? What hours? Does she need to show ID or register? Is there a fee?</li>
+      <li>We'll arrive around 2–3 PM. Will the room be ready? Is there an early check-in charge?</li>
+      <li>What time is checkout on Monday? Is late checkout or bag storage possible?</li>
+      <li>If I book through OYO / MakeMyTrip / FabHotels, will you honour that booking and price at the desk?</li>
+      <li>Is there reliable hot water and AC in the room? Is there a lift?</li>
+      <li>Please confirm the couple and ID answers on WhatsApp.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 7. SATURDAY ===================== -->
+<section id="saturday">
+  <div class="sec-head">
+    <div><h2>Saturday, Oct 3</h2><p class="muted">Malleshwaram on foot in the morning, the palace in the afternoon. Times are suggestions.</p></div>
+    <span class="badge b-green">Green line day</span>
+  </div>
+  <ol class="line" id="satLine"></ol>
+</section>
+
+<!-- ===================== 8. SUNDAY ===================== -->
+<section id="sunday">
+  <div class="sec-head">
+    <div><h2>Sunday, Oct 4</h2><p class="muted">Central and south Bengaluru. Everything after Cubbon Park is flexible.</p></div>
+    <span class="badge b-purple">Purple line day</span>
+  </div>
+  <ol class="line purple" id="sunLine"></ol>
+</section>
+
+<!-- ===================== 9. FOOD ===================== -->
+<section id="food">
+  <div class="sec-head"><div><h2>Food guide</h2><p class="muted">Grouped by area so it matches the day plans. Ratings and opening hours were not verified in this pass, so they aren't shown as numbers. Price bands are my estimates unless a source is quoted.</p></div></div>
+  <div class="tabs" role="tablist" id="foodTabs"></div>
+  <div id="foodPanel" class="grid g2" role="tabpanel"></div>
+</section>
+
+<!-- ===================== 10. PLACES ===================== -->
+<section id="places">
+  <div class="sec-head"><div><h2>Places to visit</h2><p class="muted">Mostly free or cheap, clustered around your base.</p></div></div>
+  <div class="grid g2" id="placeCards"></div>
+</section>
+
+<!-- ===================== 11. TRANSPORT ===================== -->
+<section id="transport">
+  <div class="sec-head"><div><h2>Airport transport</h2><p class="muted">There's no metro to the airport yet; the airport Blue Line is reported for around mid-2027.</p></div></div>
+  <div class="grid g2">
+    <div class="panel">
+      <h3>Friday: BLR → hotel</h3>
+      <dl class="kv" style="margin-top:10px">
+        <dt>Airport bus KIA-10</dt><dd>Vayu Vajra (BMTC, AC Volvo). Stops include Hebbal, Mekhri Circle, <b>Yeshwanthpur TTMC</b>, <b>ISKCON</b>, <b>Rajajinagar</b>, then on to Vijayanagar and Mysuru Road. Full route ≈ 97–105 min.</dd>
+        <dt>Bus fare</dt><dd>₹300–360 for KIA-10 (unofficial fare chart). Other unofficial sites give ₹150–400 across routes. Fares change, so check the Namma BMTC app for the current KIA-10 fare.</dd>
+        <dt>Bus frequency</dt><dd>KIA-10 roughly every 30–60 min (unofficial tracker).</dd>
+        <dt>Airport bus KIA-9</dt><dd>To Majestic via Palace Guttahalli and Mekhri Circle, ≈ 55–75 min. Useful for the Ramachandrapuram hotel near KSR.</dd>
+        <dt>Cab</dt><dd>Rajajinagar ≈ 34 km, ≈ 48 min in light traffic. Quoted fares: KSTDC ≈ ₹817 (day), Ola Prime Sedan ≈ ₹1,151 (TaxiAutoFare). App surge can push this higher.</dd>
+        <dt>Where to get off</dt><dd>ISKCON stop for Kingston/Bloom; Yeshwanthpur TTMC for Yeshwanthpur hotels; Rajajinagar for Thimmaiah Rd / Grand Regency side; KIA-9 to Majestic for Ramachandrapuram.</dd>
+      </dl>
+      <div class="callout green"><p><b>My suggestion:</b> take a cab if you want to be checked in by ~14:30 with checked luggage. Take KIA-10 if saving ₹500–800 matters more and arriving ~15:00–15:30 is fine. Both are estimates; Friday holiday traffic can change them.</p></div>
+    </div>
+    <div class="panel">
+      <h3>Monday: hotel → BLR</h3>
+      <p class="small">Your return flight isn't booked, so no time is shown here. Enter a departure time once you book to get a leave-by time.</p>
+      <div class="calc">
+        <label>Return flight departure (Mon Oct 5)<br><input type="time" id="flightTime"></label>
+      </div>
+      <div class="calc-out" id="calcOut" aria-live="polite"><span class="muted">No return flight entered yet.</span></div>
+      <p class="small muted" style="margin-top:12px">Rule used (my rule of thumb for a domestic flight, not an official figure): leave the hotel <b>3 h</b> before departure by cab, <b>3 h 30 min</b> by bus. That covers ~60–90 min of Monday-morning traffic, bus waiting time, and arriving at the airport ~90 min before departure.</p>
+      <p class="small">Also check your hotel's checkout time. If your flight is late in the day, ask to leave bags at reception.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 12. BOOKING CHECKLIST ===================== -->
+<section id="booking">
+  <div class="sec-head"><div><h2>Booking checklist</h2><p class="muted">Before you pay for any hotel. Ticks are saved in this browser.</p></div></div>
+  <div class="panel"><ul class="check" id="bookList"></ul></div>
+</section>
+
+<!-- ===================== 13. DECIDE ===================== -->
+<section id="decide">
+  <div class="sec-head"><div><h2>What I still need to decide</h2><p class="muted">The real open decisions. Ticks are saved in this browser.</p></div></div>
+  <div class="panel"><ul class="check" id="decideList"></ul></div>
+</section>
+
+<!-- ===================== 14. SOURCES ===================== -->
+<section id="sources" class="sources">
+  <div class="sec-head"><div><h2>Sources &amp; verification notes</h2></div></div>
+  <div class="grid g2">
+    <div class="panel">
+      <h3 style="margin-top:0">What I checked, and what I couldn't</h3>
+      <ul class="tight small">
+        <li><b>Checked on:</b> Oct 1, 2026, by web search. Hotel prices come from listing pages whose dates were not Oct 2–5.</li>
+        <li><b>Could not do:</b> live Oct 2–5 availability or prices; reading Reddit; reading full MakeMyTrip/Goibibo/Booking.com policy text.</li>
+        <li><b>Taken from ChatGPT's research without re-checking:</b> Octave Royal Opera, Habitat Comforts, Galaxy Budget Rooms, Nava Nidhi, Isnas, Saarang, Saavees, Treebo Global Stay, and several prices. They're labelled “reported by ChatGPT”.</li>
+        <li><b>Distances:</b> only sourced distances count for the ISKCON/Metro filters. My own estimates are labelled.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0">Your flight</h3>
+      <p class="small">From your booking (PNR deliberately left out): IndiGo 6E 826, Fri Oct 2, DEL T1 09:30 → BLR T1 12:25, non-stop, 7 kg cabin + 15 kg check-in, seat 33A.</p>
+    </div>
+  </div>
+  <div id="sourceList"></div>
+</section>
+
+<footer>Built Oct 1, 2026 for a personal trip. Nothing here is a booking; always check the live page before paying.</footer>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+"use strict";
+/* ============================ helpers ============================ */
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const gm = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+const dir = (a, b, mode) => "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(a) + "&destination=" + encodeURIComponent(b) + "&travelmode=" + (mode || "transit");
+const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k) || "null"); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+/* ============================ theme ============================ */
+(function(){
+  const saved = store.get("blr-theme");
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  $("#themeBtn").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme")
+      || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    store.set("blr-theme", next);
+  });
+})();
+
+/* ============================ SOURCES ============================ */
+const S = {
+  oyoThim: ["OYO: Hotel O Thimmaiah Rd property page", "https://www.oyorooms.com/760/"],
+  oyoCoupleRaj: ["OYO: couple-friendly hotels, Rajajinagar", "https://www.oyorooms.com/hotels-near-rajajinagar-bangalore/oyo-welcomes-couples/"],
+  oyoCoupleRaji: ["OYO: couple-friendly hotels, Rajaji Nagar", "https://www.oyorooms.com/hotels-in-rajaji-nagar-bangalore/oyo-welcomes-couples/"],
+  oyoFlagRaj: ["OYO: flagship hotels, Rajajinagar (price snapshot)", "https://www.oyorooms.com/flagship-hotels-in-rajajinagar-bangalore/"],
+  oyoRama: ["OYO: Super Hotel O Ramachandrapuram property page", "https://www.oyorooms.com/218441/"],
+  oyoLocalMal: ["OYO: local IDs accepted, Malleshwaram", "https://www.oyorooms.com/hotels-in-malleshwaram-bangalore/local-ids-accepted/"],
+  oyoIskcon: ["OYO: hotels near ISKCON Hare Krishna Temple", "https://www.oyorooms.com/flagship-hotels-in-iskcon-hare-krishna-temple-bangalore/"],
+  bkYesh: ["Booking.com: Yeshwantpur district (Stay Comforts 6.7/10)", "https://www.booking.com/district/in/bengaluru/yeshwantpur.html"],
+  agStay: ["Agoda: Super Hotel O Yeshwanthpur", "https://www.agoda.com/hotel-o-stay-comfort/hotel/bangalore-in.html"],
+  mmtStay: ["MakeMyTrip: Hotel O Yeshwanthpur (Stay Comforts)", "https://www.makemytrip.global/hotels/super_hotel_o_yeshwanthpur_formerly_stay_comforts-details-bangalore.html"],
+  pohStay: ["Planet of Hotels: Stay Comforts (check-in/out, coordinates)", "https://en.planetofhotels.com/india/bangalore/super-hotel-o-yeshwanthpur-formerly-stay-comforts"],
+  fabRaj: ["FabHotels: Rajajinagar listing", "https://www.fabhotels.com/hotels-in-bangalore/rajajinagar/"],
+  fabBas: ["FabHotels: Basaveshwara Nagar (via ChatGPT)", "https://www.fabhotels.com/hotels-in-bangalore/basaveshwara-nagar/"],
+  fabYesh: ["FabHotels: Yeshwanthpur (via ChatGPT, reported sold out)", "https://www.fabhotels.com/hotels-in-bangalore/yeshwanthpur/"],
+  kayakA: ["KAYAK: nearby hotels list (Royal Grand, Grand Regency, Shoba Elite)", "https://www.nz.kayak.com/Bengaluru-Hotels-Shree-Guru-Residency.481903.ksp"],
+  kayakB: ["KAYAK: nearby hotels list (alt. snapshot)", "https://en.kayak.sa/Bengaluru-Hotels-Shree-Guru-Residency.481903.ksp"],
+  mmtGR: ["MakeMyTrip: Grand Regency reviews", "https://ae.makemytrip.global/hotels-international/en-ae/india/bangalore-hotels/review-of-grand_regency_rajajinagar_iskcon_temple_wtc-details.html"],
+  mmtGR2: ["MakeMyTrip: Grand Regency listing (via ChatGPT)", "https://www.makemytrip.com/hotels/grand_regency_rajajinagar_iskcon_temple_wtc-details-bangalore.html"],
+  yatraGR: ["Yatra: Grand Regency (couples welcome, local ID except PAN)", "https://www.yatra.com/hotels/hotels-in-bangalore/grand-regency"],
+  emtGR: ["EaseMyTrip: Grand Regency (local ID not accepted)", "https://www.easemytrip.com/hotels/grand-regency-1895721/"],
+  goiGR: ["Goibibo: Grand Regency", "https://www.goibibo.com/hotels/grand-regency-rajajinagar-iskcon-temple-wtc-hotel-in-bangalore-5545190549955030253/"],
+  hcShoba: ["Hotels.com: near Rajajinagar Station (Shoba Elite, Istay prices)", "https://in.hotels.com/de1762142/book-near-rajajinagar-station-bengaluru-india-hotel-rooms/"],
+  hcShoba2: ["Hotels.com: Shoba Elite reviews", "https://uk.hotels.com/ho693566720/shoba-elite-bengaluru-india"],
+  tvShoba: ["Travelocity: Shoba Elite (address, rooms)", "https://www.travelocity.com/Bengaluru-Hotels-Shoba-Elite.h21642710.Hotel-Information"],
+  exShoba: ["Expedia: Shoba Elite (checkout, cancellation)", "https://www.expedia.co.kr/en/Bengaluru-Hotels-Shoba-Elite.h21642710.Hotel-Information"],
+  hcFabGS: ["Hotels.com: FabHotel Global Stay Rajajinagar", "https://www.hotels.com/ho4065139232"],
+  hcFabGS2: ["Hotels.com: FabHotel Global Stay (2.0/10, 1 review)", "https://au.hotels.com/ho3475972192/"],
+  treeboGS: ["Treebo: Global Stay Rajajinagar (via ChatGPT)", "https://www.treebo.com/hotels-in-bangalore/treebo-global-stay-rajajinagar-rajajinagar-4436/"],
+  mmtOrr: ["MakeMyTrip: ORR–Yeshwantpur hotels (Octave, via ChatGPT)", "https://www.makemytrip.com/hotels/hotels-in-orr_yeshwantpur-bangalore.html"],
+  mmtYeshInd: ["MakeMyTrip: Yeshwanthpur hotels (Habitat, via ChatGPT)", "https://www.makemytrip.com/hotels/hi/hotels-in-yeshwanthpur_industrial_suburb_bangalore-bangalore.html"],
+  goiGalaxy: ["Goibibo: Galaxy Budget Rooms (via ChatGPT)", "https://www.goibibo.com/hotels/grand-arabian-hotel-in-bangalore-5579129072026086612/"],
+  mmtIsnas: ["MakeMyTrip: Isnas Residency (via ChatGPT)", "https://www.makemytrip.com/hotels/isnas_residency_yeshwanthpur-details-bangalore.html"],
+  mmtSaarang: ["MakeMyTrip: Hotel Saarang Forever (via ChatGPT)", "https://www.makemytrip.com/hotels/hotel_saarang_forever-details-bangalore.html"],
+  emtHabitat: ["EaseMyTrip: Habitat Comforts (older reviews)", "https://www.easemytrip.com/hotels/hotel-habitat-comforts-1814780/"],
+  bkKing: ["Booking.com: Kingston Hotel", "https://www.booking.com/hotel/in/kingston-bangalore.html"],
+  jdKing: ["Justdial: Kingston Hotel reviews", "https://www.justdial.com/Bangalore/Kingston-Hotel-Next-to-Iskcon-Temple-Rajajinagar/080PXX80-XX80-220727105742-U1K2_BZDET/reviews"],
+  b2bKing: ["Bag2Bag: Kingston (couple / local ID)", "https://bag2bag.in/hotels-stay/bangalore/rajaji-nagar/kingston-hotel"],
+  tripKing: ["Trip.com: Kingston Hotel", "https://www.trip.com/hotels/bangalore-hotel-detail-99463261/kingston-hotel/"],
+  mmtKing: ["MakeMyTrip: Kingston (via ChatGPT)", "https://www.makemytrip.com/hotels/kingston_hotel-details-bangalore.html"],
+  agBloom: ["Agoda: Bloom Hotel ISKCON Rajajinagar", "https://www.agoda.com/en-in/bloom-hotel-iskcon-rajajinagar/hotel/bangalore-in.html"],
+  msBloom: ["MiStay: Bloom (couple friendly)", "https://www.mistay.in/hotels-in-bangalore/bloom-hotel-iskcon-rajajinagar/"],
+  tripBloom: ["Trip.com: Bloom (check-in/out)", "https://www.trip.com/hotels/bangalore-hotel-detail-133659010/bloom-hotel-iskcon-rajajinagar/"],
+  mmtSaavees: ["MakeMyTrip: Saavees Residency (via ChatGPT)", "https://www.makemytrip.com/hotels/saavees_residency-details-bangalore.html"],
+  ihgHIE: ["IHG: Holiday Inn Express Yeshwantpur", "https://www.ihg.com/holidayinnexpress/hotels/gb/en/bengaluru/blrby/hoteldetail"],
+  ctHIE: ["Cleartrip: HIE (unmarried couples allowed)", "https://www.cleartrip.com/hotels/details/holiday-inn-express-bengaluru-yeshwantpur-an-ihg-hotel-2861510"],
+  trvHIE: ["trivago: HIE Oct 2 price (via ChatGPT)", "https://www.trivago.in/en-IN/oar/hotel-holiday-inn-express-bengaluru-yeshwantpur-by-ihg?search=100-10463886"],
+  ixIstay: ["ixigo: Istay Rajajinagar", "https://www.ixigo.com/hotels/istay-hotels-rajajinagar-in-bengaluru-1138694-d"],
+  mmtIstay: ["MakeMyTrip: Istay reviews", "https://www.makemytrip.global/hotels/review-of-istay_hotels_rajajinagar-details-bangalore.html"],
+  exBee: ["Expedia: hotels near ISKCON (Grand Bee fish-market review)", "https://www.expedia.com/es/Templo-De-ISKCON-Hoteles.0-l6104846-0.Guia-Viajes-Filter-Hoteles"],
+  taBee: ["Tripadvisor: Hotel Grand Bee", "https://www.tripadvisor.in/Hotel_Review-g297628-d1640401-Reviews-Hotel_Grand_Bee_Yeshwanthpur_Junction-Bengaluru_Bangalore_District_Karnataka.html"],
+  ydYatri: ["Yatradham: ISKCON guest house terms", "https://yatradham.org/bangalore-iskcon-temple-guest-house.html"],
+  iskGH: ["ISKCON Bangalore: Guest house (official)", "https://www.iskconbangalore.org/guest-house/"],
+  oyoPolicy: ["IANS: OYO lets partner hotels decline couples (Jan 2025)", "https://ianslive.in/no-room-for-unmarried-couples-oyo-explains-check-in-policy-for-partner-hotels--20250105205709"],
+  ixVisit: ["ixigo: are visitors allowed in hotel rooms in India", "https://www.ixigo.com/travel-stories?p=1186325"],
+  quoraOyo: ["Quora: local ID at OYO, refusal anecdotes", "https://quora.com/Is-a-local-ID-allowed-in-OYO-Rooms"],
+  iskTime: ["ISKCON Bangalore: official darshan timings", "https://www.iskconbangalore.org/iskcon-temple-bangalore-timings/"],
+  iskTime2: ["ISKCON Bangalore: timings page (weekend 8:20 PM)", "https://www.iskconbangalore.org/?p=19219"],
+  iskReview: ["Wanderlog: ISKCON review summary (khichdi prasadam)", "https://wanderlog.com/place/details/12689726/iskcon-temple"],
+  catAarti: ["CaptureATrip: ISKCON tips (7 PM aarti, dress)", "https://www.captureatrip.com/blog/iskon-temple-bangalore"],
+  palace: ["Karnataka Tourism: Bangalore Palace", "https://www.karnatakatourism.org/tour-item/bangalore-palace/"],
+  palaceCam: ["Globetrove: palace camera charges", "https://www.globetrove.com/?p=7858"],
+  walk: ["Trip.com: Malleswaram heritage walk (Kadu Malleswara, Nandi Tirtha, Sankey Tank)", "https://ph.trip.com/things-to-do/detail/63284841"],
+  walk2: ["Expedia: Malleshwaram heritage walk (street art, dhobi ghat)", "https://www.expedia.com/es/things-to-do/m.a50396379.detalles-actividades"],
+  sk: ["SilverKris: insider guide (Cubbon Park, Vidyarthi Bhavan)", "https://silverkris.singaporeair.com/inspiration/nature-adventure/travel-tips/an-insiders-guide-to-bangalore-india/"],
+  vv: ["Wikipedia: Vayu Vajra routes (KIA-10 stops)", "https://en.wikipedia.org/wiki/Vayu_Vajra"],
+  bmFare: ["Bangaloremapped: fare chart (KIA-10 ₹300–360, unofficial)", "https://bangaloremapped.com/fare-chart"],
+  bab: ["BangaloreAirportBus: route list (KIA-9, KIA-10)", "https://bangaloreairportbus.com/blog/All-Bangalore-Airport-Bus-Routes-and-Schedules-or-BMTC-Vayu-Vajra-Timings"],
+  moovit: ["Moovit: KIA-10 route (~97 min)", "https://moovitapp.com/index/en/public_transit-line-kia_10-Bengaluru-3620-894709-35173586-0"],
+  witty: ["Airport bus finder (KIA-10 frequency, unofficial)", "https://wittycoder.in/tools/airport-bus"],
+  taxi: ["TaxiAutoFare: Rajajinagar ↔ airport fares", "https://www.taxiautofare.com/taxi-fare/airport-taxi-fare-from-rajajinagar-to-Kempegowda-International-Airport"],
+  metroAir: ["Wikipedia: KIAL Terminals metro station (Blue Line timing)", "https://en.wikipedia.org/wiki/KIAL_Terminals_metro_station"],
+  ctrWiki: ["Wikipedia: Central Tiffin Room", "https://en.wikipedia.org/wiki/Central_Tiffin_Room"],
+  ctrWl: ["Wanderlog: CTR review summary", "https://wanderlog.com/place/details/1323789"],
+  ctrTa: ["Tripadvisor: Shri Sagar (CTR)", "https://www.tripadvisor.in/Restaurant_Review-g297628-d850324-Reviews-Shri_Sagar_C_T_R-Bengaluru_Bangalore_District_Karnataka.html"],
+  veena: ["Wanderlog: Veena Stores review summary", "https://wanderlog.com/place/details/1323798"],
+  idliBlog: ["Pratik Chandak (Substack): best idli in Bangalore", "https://pratikchandak.substack.com/p/the-best-places-to-get-idli-in-bangalore"],
+  ragh: ["District: Sri Raghavendra Stores", "https://www.district.in/dining/bangalore/sri-raghavendra-stores-malleshwaram"],
+  halli: ["Wanderlog: Halli Mane review summary", "https://wanderlog.com/place/details/1414046/hallimane-restaurant"],
+  halli2: ["TasteAtlas: akki rotti at Halli Mane", "https://tasteatlas.com/hallimane/akki-rotti"],
+  sairam: ["Wanderlog: Sri Sairam's Chats review summary", "https://wanderlog.com/place/details/1393225"],
+  janatha: ["Wanderlog: Hotel Janatha review summary", "https://wanderlog.com/place/details/3254014"],
+  ksagar: ["Wanderlog: Krishna Sagar review summary", "https://wanderlog.com/place/details/9947054/krishna-sagar-restaurant"],
+  taRaj: ["Tripadvisor: restaurants near Rajajinagar (Nalapaka, Kadamba, Empire)", "https://www.tripadvisor.in/RestaurantsNear-g1187925-d9572108-Rajajinagar-Yeshwantpur_Bangalore_District_Karnataka.html"],
+  vbWl: ["Wanderlog: Vidyarthi Bhavan review summary", "https://wanderlog.com/place/details/893547/vidyarthi-bhavan"],
+  vbWiki: ["Wikipedia: Vidyarthi Bhavan", "https://en.wikipedia.org/wiki/Vidyarthi_Bhavan"]
+};
+const srcLinks = keys => keys.map(k => S[k] ? `<a href="${esc(S[k][1])}" target="_blank" rel="noopener">${esc(S[k][0])}</a>` : "").join("");
+
+/* ============================ HOTELS ============================ */
+/* status values: yes | no | conflict | unknown ; basis: explicit | reported | inferred | none */
+const CHECKED = "Oct 1, 2026 (listing snapshot; source dates were not Oct 2–5)";
+const hotels = [
+{ id:"thimmaiah", group:"fit", label:"Strongest review volume under ₹1,500",
+  name:"Super Hotel O Thimmaiah Rd, Rajajinagar", aka:"OYO; trade name SIn Residency",
+  area:"Shivanagar, West of Chord Rd, Rajajinagar", maps:"SIn Residency Thimmaiah Road Rajajinagar Bangalore",
+  band:"lt1500", night:[1000,1465], priceNote:"OYO snapshots: ₹903 + ₹97 tax; ₹1,021–1,123 on the property page. ChatGPT later saw ₹1,323 + ₹141.",
+  taxes:"≈ ₹97–141 per night on OYO", cancel:"OYO advertises free cancellation on many rates. Confirm on the exact rate.", cancelFree:"advertised",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["OYO","4.4/5","≈2,200–2,950 ratings (differs by snapshot)"]], ratingOther:"No Google, Booking.com or MMT score found for this property.",
+  reviews:"good1", reviewCount:"≈2,500",
+  couple:{s:"yes", t:"“Couples are welcome” on the OYO property page.", basis:"explicit"},
+  localId:{s:"yes", t:"Local or outstation ID accepted; PAN card not accepted (OYO property page).", basis:"explicit"},
+  ids:"Government photo ID; PAN not accepted.",
+  visitor:{s:"unknown", t:"Not stated in any source found."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"Not verified. My earlier estimate was ~1.5–2.5 km (unverified).", near:null},
+  metro:{t:"Not verified.", near:null},
+  hub:"Rajajinagar side of Chord Road; OYO lists it 0.5 km from the Rajajinagar locality centre.",
+  airport:"Rajajinagar ≈ 34 km; ≈ 48 min in light traffic (TaxiAutoFare). Plan 60–90 min.",
+  room:"Deluxe room ≈ 9 sqm — small.",
+  conf:"MEDIUM", call:true,
+  notes:["Most reviews of any sub-₹1,500 option, but all on one platform (OYO).","Explicit couple and local-ID wording on the listing, which is better than a tag alone.","OYO lets partner hotels decline couples at their discretion, so call anyway."],
+  sources:["oyoThim","oyoFlagRaj","oyoCoupleRaj","oyoPolicy"] },
+
+{ id:"ramachandrapuram", group:"fit", label:"Cheapest well-rated option; best for Majestic/KSR",
+  name:"Super Hotel O Ramachandrapuram", aka:"OYO; formerly Nataraja Boarding & Lodging",
+  area:"Ramachandrapuram Main Rd, near Sujata Theatre (near KSR / Majestic)", maps:"Nataraja Boarding Lodging Ramachandrapuram Bangalore",
+  band:"lt1500", night:[820,1590], priceNote:"OYO snapshots on different dates: ₹740 + ₹79, ₹1,143 + ₹121, ₹1,304 + ₹139, ₹1,434 + ₹153.",
+  taxes:"≈ ₹79–153 per night on OYO", cancel:"OYO advertises free cancellation on many rates. Confirm on the exact rate.", cancelFree:"advertised",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["OYO","4.5/5","≈590–840 ratings (differs by snapshot)"]], ratingOther:"No other platform score found.",
+  reviews:"good1", reviewCount:"≈700",
+  couple:{s:"yes", t:"Appears in OYO's ‘couple friendly hotels in Rajajinagar’ list.", basis:"explicit"},
+  localId:{s:"yes", t:"Appears in OYO's ‘local IDs accepted’ list for Malleshwaram.", basis:"explicit"},
+  ids:"Not stated on the page I saw; OYO generally accepts Aadhaar, DL, voter ID, passport.",
+  visitor:{s:"unknown", t:"Not stated in any source found."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"≈ 3.7 km (OYO listing distance).", near:false},
+  metro:{t:"≈ 1.2 km to Magadi Road Metro (OYO).", near:false},
+  hub:"≈ 0.9 km from Bangalore City (KSR) railway station (OYO).",
+  airport:"Take KIA-9 to Majestic, or a cab. Majestic-area time not verified.",
+  room:"Not stated.",
+  conf:"MEDIUM", call:true,
+  notes:["Good if you'll lean on Majestic for buses/metro; less convenient for daily ISKCON visits.","Rating is OYO-only."],
+  sources:["oyoRama","oyoCoupleRaj","oyoLocalMal","oyoIskcon","oyoFlagRaj"] },
+
+{ id:"staycomforts", group:"caution", label:"Close to ISKCON, but reviews conflict",
+  name:"Super Hotel O Yeshwanthpur", aka:"OYO; formerly Stay Comforts",
+  area:"VVP Complex, 1st Stage, 4th Phase, Yeshwanthpur", maps:"Super Hotel O Yeshwanthpur Stay Comforts Bangalore",
+  band:"lt1500", night:[959,1579], priceNote:"OYO: ₹1,579 (one list) and ₹959 + ₹101 (ChatGPT). MakeMyTrip: ‘from ₹1,053’.",
+  taxes:"≈ ₹101 per night (one OYO snapshot)", cancel:"OYO advertises free cancellation on many rates. Confirm.", cancelFree:"advertised",
+  checkin:"12:00 (Planet of Hotels)", checkout:"11:00 (Planet of Hotels)",
+  ratings:[["OYO","4.5/5","1,262 ratings"],["Booking.com","6.7/10","124 reviews"],["Agoda","6.4/10 overall","≈125 reviews"],["MakeMyTrip","4.1/5","59 ratings"]],
+  ratingOther:"OYO looks excellent; Booking.com and Agoda say only ‘pleasant’. Agoda's facilities sub-score was the weakest.",
+  reviews:"conflict", reviewCount:"1,262 (OYO) vs 124 (Booking)",
+  couple:{s:"yes", t:"Listed in OYO's couple-friendly Rajaji Nagar list; several MakeMyTrip reviews are from couples.", basis:"explicit"},
+  localId:{s:"unknown", t:"ChatGPT reported local ID accepted (OYO). I did not see it in the OYO local-ID list I checked.", basis:"reported"},
+  ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated in any source found."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"≈ 1.6 km straight line, computed from the listing's coordinates (walking distance will be longer).", near:true},
+  metro:{t:"Not verified.", near:null},
+  hub:"Yeshwanthpur. Exact walk to Yeshwanthpur station not verified.",
+  airport:"KIA-10 stops at Yeshwanthpur TTMC.",
+  room:"Not stated.",
+  conf:"LOW", call:true,
+  notes:["Cross-platform disagreement is the main reason this isn't a top candidate.","Only consider if the two fit options are sold out, and read the newest Booking.com reviews first."],
+  sources:["oyoCoupleRaji","bkYesh","agStay","mmtStay","pohStay"] },
+
+{ id:"royalgrand", group:"caution", label:"Couple tag and pay-at-hotel, moderate reviews",
+  name:"FabHotel Royal Grand", aka:"FabHotels",
+  area:"Basaveshwara Nagar", maps:"FabHotel Royal Grand Basaveshwara Nagar Bangalore",
+  band:"mid", night:[1256,1641], priceNote:"FabHotels: ₹1,256 (earlier snapshot, 1 night 2 guests); ₹1,547 + ₹94 GST (ChatGPT).",
+  taxes:"≈ ₹94 GST (ChatGPT snapshot)", cancel:"Pay-at-hotel option listed; cancellation terms not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["FabHotels (Google-sourced)","4.0–4.1/5","127–130 ratings"],["KAYAK","6.9/10","22 reviews"],["KAYAK (other snapshot)","8.9/10","2 reviews"]],
+  ratingOther:"Scores are middling and based on few reviews.",
+  reviews:"moderate", reviewCount:"≈130",
+  couple:{s:"yes", t:"‘Couple friendly’ tag on FabHotels.", basis:"explicit"},
+  localId:{s:"unknown", t:"ChatGPT reported local ID accepted (FabHotels). Not re-verified.", basis:"reported"},
+  ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated in any source found."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"≈ 3.7 km (ChatGPT). FabHotels lists it 1.8 km from Rajajinagar's centre.", near:false},
+  metro:{t:"Not verified.", near:null},
+  hub:"Basaveshwara Nagar (west of Rajajinagar).",
+  airport:"Not verified; similar to Rajajinagar plus local traffic.",
+  room:"Not stated.",
+  conf:"MEDIUM", call:true,
+  notes:["Fits the ₹1,500–2,000 band, but review evidence is thinner than the two OYO fit options."],
+  sources:["fabRaj","fabBas","kayakA","kayakB"] },
+
+{ id:"grandregency", group:"caution", label:"Well reviewed; ID policy conflicts; often above ₹2,000",
+  name:"Grand Regency Rajajinagar, ISKCON Temple – WTC", aka:"Also listed as Treebo Trip Grand Regency",
+  area:"West of Chord Rd, Shivanagar, Rajajinagar", maps:"Grand Regency Rajajinagar Bangalore",
+  band:"gt2000", night:[1850,2975], priceNote:"Goibibo: ₹1,850–2,700 + taxes; EaseMyTrip: ₹2,975 + tax (earlier snapshots). Can dip near ₹2,000 with discounts.",
+  taxes:"Extra, amount not confirmed", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"12 PM (earlier research)", checkout:"10 AM (earlier research)",
+  ratings:[["MakeMyTrip","4.3/5","375 ratings"],["ixigo","9.2/10","685"],["Goibibo","4.1/5",""],["KAYAK","7.2/10","46"],["KAYAK (Treebo Trip listing)","6.9/10","41"],["Business listing (via ChatGPT)","4.7/5","≈4,600"]],
+  ratingOther:"Good on MMT/ixigo; average on KAYAK. MMT reviewers praised safety and clean washrooms; food and slow room service drew complaints.",
+  reviews:"mixedgood", reviewCount:"375–4,600 depending on platform",
+  couple:{s:"yes", t:"Yatra: couples welcome. MakeMyTrip (per ChatGPT): unmarried couples accepted.", basis:"explicit"},
+  localId:{s:"conflict", t:"Yatra: local ID accepted except PAN. MakeMyTrip (per ChatGPT): accepted. EaseMyTrip: local ID NOT accepted.", basis:"explicit"},
+  ids:"PAN not accepted (Yatra).",
+  visitor:{s:"unknown", t:"Not stated in any source found."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"Sources disagree: ≈1–1.5 km (my earlier research) vs ≈2.7 km (ChatGPT).", near:null},
+  metro:{t:"Reported walkable to Rajajinagar Metro (earlier research); distance not confirmed.", near:null},
+  hub:"≈3.6 km to Majestic (ChatGPT).",
+  airport:"Rajajinagar ≈ 34 km; plan 60–90 min.",
+  room:"Some reviews mention an older building under repair.",
+  conf:"MEDIUM", call:true,
+  notes:["Book only if the Oct 2–5 total is ≤ ₹6,000 and the hotel confirms local ID by phone."],
+  sources:["mmtGR","mmtGR2","yatraGR","emtGR","goiGR","kayakB"] },
+
+{ id:"shoba", group:"weak", label:"Thin, inconsistent evidence",
+  name:"Shoba Elite", aka:"",
+  area:"60 Feet Rd, near Havanur Circle, Basaveshwara Nagar", maps:"Shoba Elite Basaveshwara Nagar Bangalore",
+  band:"gt2000", night:[2174,2174], priceNote:"Hotels.com: ₹2,070 (₹2,174 incl. taxes) for a July night.",
+  taxes:"≈ ₹104 (Hotels.com snapshot)", cancel:"Free cancellation on select rates (Expedia).", cancelFree:"select",
+  checkin:"Not confirmed", checkout:"12 PM (Expedia)",
+  ratings:[["KAYAK","8.2/10","96 reviews"],["Hotels.com / Expedia","7.0/10","2 reviews"],["Hotels.com (other snapshot)","4.0/10","same 2 reviews"]],
+  ratingOther:"The only written review I could read complained of torn, unclean linens and no proper breakfast.",
+  reviews:"weak", reviewCount:"2–96",
+  couple:{s:"unknown", t:"No couple policy found.", basis:"none"},
+  localId:{s:"unknown", t:"No local-ID policy found.", basis:"none"},
+  ids:"Not stated.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Within 5 km (Expedia). Exact distance not verified.", near:false},
+  metro:{t:"1.9 km from Rajajinagar Station (Hotels.com).", near:false},
+  hub:"Basaveshwara Nagar.",
+  airport:"≈ 71-min drive (Travelocity estimate).",
+  room:"Executive double ≈ 19 sqm (205 sq ft).",
+  conf:"LOW", call:true,
+  notes:["Slightly over budget with no couple/local-ID evidence; not worth it over the fit options."],
+  sources:["hcShoba","hcShoba2","tvShoba","exShoba","kayakA"] },
+
+{ id:"fabglobal", group:"weak", label:"Almost no review evidence",
+  name:"FabHotel Global Stay Rajajinagar", aka:"May be the same building as ‘Treebo Global Stay Rajajinagar’ — not confirmed",
+  area:"No.148, 1st A Main Rd, 1st N Block, Rajajinagar", maps:"FabHotel Global Stay Rajajinagar Bangalore",
+  band:"unknown", night:null, priceNote:"Hotels.com snapshots US$24–29 per night incl. taxes (Mar–May 2026 dates). Not converted; price needs confirmation.",
+  taxes:"Included in the Hotels.com figure", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"12 PM–midnight (Hotels.com)", checkout:"11 AM (Hotels.com)",
+  ratings:[["Hotels.com","2.0/10","1 review"]], ratingOther:"Not enough reviews to judge.",
+  reviews:"insufficient", reviewCount:"1",
+  couple:{s:"unknown", t:"Not verified for this listing.", basis:"none"},
+  localId:{s:"unknown", t:"Not verified for this listing.", basis:"none"},
+  ids:"Government photo ID ‘may be required’ (Hotels.com).",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"≈ 3.3 km, 8-min drive (Hotels.com).", near:false},
+  metro:{t:"Rajajinagar Station ≈ 17-min walk (Hotels.com).", near:false},
+  hub:"Yeshwanthpur Junction ≈ 6-min drive (Hotels.com).",
+  airport:"≈ 57-min drive (Hotels.com estimate).",
+  room:"Deluxe ≈ 14 sqm; 14 rooms; no lift.",
+  conf:"LOW", call:true,
+  notes:["One review is not evidence either way. Skip unless nothing else is available."],
+  sources:["hcFabGS","hcFabGS2"] },
+
+{ id:"treeboglobal", group:"weak", label:"Policy published, reviews missing",
+  name:"Treebo Global Stay Rajajinagar", aka:"Reported by ChatGPT; not re-verified",
+  area:"Rajajinagar", maps:"Treebo Global Stay Rajajinagar Bangalore",
+  band:"unknown", night:null, priceNote:"Price needs confirmation.",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[], ratingOther:"No review score found for this branch. Other ‘Global Stay’ branches are not used as a proxy.",
+  reviews:"insufficient", reviewCount:"—",
+  couple:{s:"yes", t:"Treebo's own page says couple friendly (per ChatGPT).", basis:"reported"},
+  localId:{s:"yes", t:"Treebo's own page says local ID accepted (per ChatGPT).", basis:"reported"},
+  ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null},
+  metro:{t:"≈ 650 m to Rajajinagar Metro (per ChatGPT). Conflicts with the FabHotel Global Stay listing's 17-min walk, if it's the same building.", near:null},
+  hub:"≈ 1 km to Orion Mall (per ChatGPT).",
+  airport:"Rajajinagar ≈ 34 km; plan 60–90 min.",
+  room:"Not stated.",
+  conf:"LOW", call:true,
+  notes:["Good policy wording, no review evidence. You asked for good reviews, so this stays out of the fit group."],
+  sources:["treeboGS"] },
+
+{ id:"dhaya", group:"weak", label:"Reported sold out; no rating found",
+  name:"FabHotel Dhaya Grand Inn", aka:"FabHotels",
+  area:"Yeshwanthpur", maps:"FabHotel Dhaya Grand Inn Yeshwanthpur Bangalore",
+  band:"lt1500", night:null, priceNote:"FabHotels showed ₹1,300 (1 night, 2 guests) in an earlier snapshot. ChatGPT later found it sold out for the searched dates. I could not re-check live availability. Price needs confirmation.",
+  taxes:"Unknown", cancel:"Pay-at-hotel listed; cancellation not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[], ratingOther:"No reliable score found. (A 4.9 figure attributed to my earlier research was not something I reported.)",
+  reviews:"insufficient", reviewCount:"—",
+  couple:{s:"yes", t:"‘Couple friendly’ tag on FabHotels.", basis:"explicit"},
+  localId:{s:"unknown", t:"Not found.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"Yeshwanthpur (FabHotels lists it 3.4 km from Rajajinagar's centre).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["Treat as unavailable unless it shows rooms for Oct 2–5 when you search."], sources:["fabRaj","fabYesh"] },
+
+{ id:"octave", group:"weak", label:"Cheap, weak reviews",
+  name:"Octave Royal Opera", aka:"Reported by ChatGPT; not re-verified",
+  area:"Yeshwanthpur", maps:"Octave Royal Opera Yeshwanthpur Bangalore",
+  band:"mid", night:[1767,1767], priceNote:"MakeMyTrip ₹1,550 + ₹217 (per ChatGPT).",
+  taxes:"₹217 (per ChatGPT)", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["MakeMyTrip (per ChatGPT)","3.4–3.5/5","1,300+"]], ratingOther:"",
+  reviews:"weak", reviewCount:"1,300+",
+  couple:{s:"yes", t:"Couple-friendly tag (per ChatGPT).", basis:"reported"},
+  localId:{s:"unknown", t:"Not reported.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"≈ 7-min walk to Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["Large review count, but the score is weak. Fails ‘reviews must be good’."], sources:["mmtOrr"] },
+
+{ id:"habitat", group:"weak", label:"Cheap, weak reviews",
+  name:"Hotel Habitat Comforts", aka:"Reported by ChatGPT; not re-verified",
+  area:"Yeshwanthpur", maps:"Hotel Habitat Comforts Yeshwanthpur Bangalore",
+  band:"mid", night:[1754,1754], priceNote:"MakeMyTrip ₹1,574 + ₹180 (per ChatGPT).",
+  taxes:"₹180 (per ChatGPT)", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["MakeMyTrip (per ChatGPT)","3.3/5","140+"]], ratingOther:"Older (2018) EaseMyTrip reviews: clean but very small rooms, no restaurant.",
+  reviews:"weak", reviewCount:"140+",
+  couple:{s:"yes", t:"Couple-friendly tag (per ChatGPT).", basis:"reported"},
+  localId:{s:"unknown", t:"Not reported.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"≈ 6-min walk to Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Very small (older reviews).",
+  conf:"LOW", call:true, notes:["Fails ‘reviews must be good’."], sources:["mmtYeshInd","emtHabitat"] },
+
+{ id:"galaxy", group:"weak", label:"Cheapest, weak reviews",
+  name:"Galaxy Budget Rooms", aka:"Reported by ChatGPT; not re-verified",
+  area:"Yeshwanthpur", maps:"Galaxy Budget Rooms Yeshwanthpur Bangalore",
+  band:"lt1500", night:[984,984], priceNote:"Goibibo ₹855 + ₹129 (per ChatGPT).",
+  taxes:"₹129 (per ChatGPT)", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["Goibibo (per ChatGPT)","3.5/5","≈63"]], ratingOther:"",
+  reviews:"weak", reviewCount:"≈63",
+  couple:{s:"yes", t:"Couple-friendly tag (per ChatGPT).", basis:"reported"},
+  localId:{s:"unknown", t:"Not reported.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"≈ 7-min walk to Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["Cheapest on the list; weak score on few reviews."], sources:["goiGalaxy"] },
+
+{ id:"navanidhi", group:"weak", label:"Cheap, middling reviews",
+  name:"Nava Nidhi Comforts", aka:"Reported by ChatGPT; no source link given",
+  area:"Near Yeshwanthpur station", maps:"Nava Nidhi Comforts Yeshwanthpur Bangalore",
+  band:"lt1500", night:null, priceNote:"≈ ₹1,200 in earlier listings (per ChatGPT). Price needs confirmation.",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["Unspecified platform (per ChatGPT)","≈3.7/5","800+"]], ratingOther:"",
+  reviews:"weak", reviewCount:"800+",
+  couple:{s:"yes", t:"Couple-friendly (per ChatGPT).", basis:"reported"},
+  localId:{s:"unknown", t:"Not reported.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"Near Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["No source link to check."], sources:[] },
+
+{ id:"isnas", group:"weak", label:"Policy listed, no rating found",
+  name:"Isnas Residency", aka:"Reported by ChatGPT; not re-verified",
+  area:"Yeshwanthpur", maps:"Isnas Residency Yeshwanthpur Bangalore",
+  band:"lt1500", night:null, priceNote:"≈ ₹1,200 in earlier listings (per ChatGPT). Price needs confirmation.",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[], ratingOther:"No score found. ChatGPT quoted recent comments about clean rooms and easy check-in.",
+  reviews:"insufficient", reviewCount:"—",
+  couple:{s:"yes", t:"Unmarried couples accepted on MakeMyTrip (per ChatGPT).", basis:"reported"},
+  localId:{s:"yes", t:"Local IDs accepted on MakeMyTrip (per ChatGPT).", basis:"reported"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"≈ 2 km from Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["Could be worth a look on MMT, but there's no review score to rely on yet."], sources:["mmtIsnas"] },
+
+{ id:"saarang", group:"weak", label:"Policy listed, noise reported",
+  name:"Hotel Saarang Forever", aka:"Reported by ChatGPT; not re-verified",
+  area:"Yeshwanthpur", maps:"Hotel Saarang Forever Yeshwanthpur Bangalore",
+  band:"lt1500", night:null, priceNote:"≈ ₹1,000 in earlier listings (per ChatGPT). Price needs confirmation.",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[], ratingOther:"No score found. ChatGPT noted some market-noise complaints.",
+  reviews:"insufficient", reviewCount:"—",
+  couple:{s:"yes", t:"Unmarried couples accepted on MakeMyTrip (per ChatGPT).", basis:"reported"},
+  localId:{s:"yes", t:"Local IDs accepted on MakeMyTrip (per ChatGPT).", basis:"reported"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"Not verified.", near:null}, metro:{t:"Not verified.", near:null},
+  hub:"≈ 7-min walk to Yeshwanthpur station (per ChatGPT).", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["No review score to rely on."], sources:["mmtSaarang"] },
+
+{ id:"kingston", group:"over", label:"Closest to ISKCON; strongest review evidence",
+  name:"Kingston Hotel", aka:"",
+  area:"20th A Main, 1st R Block, Rajajinagar — next to ISKCON", maps:"Kingston Hotel Rajajinagar next to ISKCON Bangalore",
+  band:"gt2000", night:null, priceNote:"Earlier snapshots: Google ≈ US$34–39/night; Goibibo ₹6,442 + taxes; ChatGPT: ‘~₹2–3k+’. Price needs confirmation.",
+  taxes:"Varies by platform", cancel:"Free-cancellable rates seen on Google Hotels (earlier). Confirm.", cancelFree:"select",
+  checkin:"12:30 PM (Booking.com)", checkout:"11 AM (Booking.com)",
+  ratings:[["Google","4.7/5","2,120"],["Justdial","4.4/5","1,321"],["Booking.com","7.3/10","221"],["Trip.com","7.9/10","134"]],
+  ratingOther:"Praised for location, staff, clean rooms and a pure-veg breakfast. Complaints: no hot water for some guests, weak AC, Wi-Fi 5.2 on Booking.com.",
+  reviews:"strong", reviewCount:"≈2,100+",
+  couple:{s:"yes", t:"Bag2Bag and MiStay list it couple friendly; MMT per ChatGPT.", basis:"explicit"},
+  localId:{s:"yes", t:"Local ID accepted (Bag2Bag / MiStay; MMT per ChatGPT).", basis:"explicit"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown. Ask.",
+  iskcon:{t:"Next to the temple (reviews say ~50 ft; MMT: 3-min walk).", near:true},
+  metro:{t:"≈ 0.7 km / 4-min walk to Mahalakshmi Metro.", near:true},
+  hub:"KIA-10 ISKCON stop nearby.", airport:"Rajajinagar ≈ 34 km; plan 60–90 min.", room:"Some rooms overlook the temple.",
+  conf:"MEDIUM", call:true, notes:["Only worth it if the Oct 2–5 total fits. Prices vary a lot between platforms, so compare."],
+  sources:["bkKing","jdKing","b2bKing","tripKing","mmtKing"] },
+
+{ id:"bloom", group:"over", label:"Newest, 2-minute walk to ISKCON",
+  name:"Bloom Hotel – ISKCON Rajajinagar", aka:"",
+  area:"150 Chord Rd, Rajajinagar", maps:"Bloom Hotel ISKCON Rajajinagar Bangalore",
+  band:"gt2000", night:null, priceNote:"Usually ₹4,000–6,000 (earlier research). Price needs confirmation.",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"2 PM (Trip.com)", checkout:"11 AM (Trip.com)",
+  ratings:[["Agoda","9.3/10","7"],["MakeMyTrip","4.5/5","53"]], ratingOther:"Excellent cleanliness scores, but few reviews and ‘very small’ rooms.",
+  reviews:"good1", reviewCount:"≈60",
+  couple:{s:"yes", t:"Bag2Bag and MiStay list it couple friendly.", basis:"explicit"},
+  localId:{s:"yes", t:"Local ID accepted (Bag2Bag / MiStay).", basis:"explicit"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"≈ 0.2 km, 2-min walk.", near:true}, metro:{t:"Not verified.", near:null},
+  hub:"KIA-10 ISKCON stop nearby.", airport:"Rajajinagar ≈ 34 km; plan 60–90 min.", room:"Very small.",
+  conf:"MEDIUM", call:true, notes:["Well over budget in most snapshots."], sources:["agBloom","msBloom","tripBloom"] },
+
+{ id:"saavees", group:"over", label:"Good reviews, just over budget",
+  name:"Saavees Residency", aka:"Reported by ChatGPT; not re-verified",
+  area:"Rajajinagar", maps:"Saavees Residency Rajajinagar Bangalore",
+  band:"gt2000", night:[3020,3020], priceNote:"MakeMyTrip ₹2,710 + ₹310 (per ChatGPT).",
+  taxes:"₹310 (per ChatGPT)", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["MakeMyTrip (per ChatGPT)","4.3/5","303"]], ratingOther:"",
+  reviews:"good1", reviewCount:"303",
+  couple:{s:"yes", t:"Unmarried couples accepted (MMT, per ChatGPT).", basis:"reported"},
+  localId:{s:"yes", t:"Local IDs accepted (MMT, per ChatGPT).", basis:"reported"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"≈ 8 min (per ChatGPT).", near:null}, metro:{t:"≈ 8-min walk to Rajajinagar Metro (per ChatGPT).", near:null},
+  hub:"Rajajinagar.", airport:"Rajajinagar ≈ 34 km; plan 60–90 min.", room:"Not stated.",
+  conf:"LOW", call:true, notes:["Over budget at the reported price."], sources:["mmtSaavees"] },
+
+{ id:"hie", group:"over", label:"Predictable chain standard",
+  name:"Holiday Inn Express Bengaluru Yeshwantpur", aka:"IHG",
+  area:"Yeshwanthpur", maps:"Holiday Inn Express Bengaluru Yeshwantpur",
+  band:"gt2000", night:[3934,4600], priceNote:"trivago ≈ ₹3,934 for Oct 2 (per ChatGPT); ₹3,900–4,600 incl. breakfast (earlier research).",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"3 PM (IHG)", checkout:"12 PM (IHG)",
+  ratings:[["Tripadvisor","4.5/5","297"]], ratingOther:"Breakfast and staff praised; standard rooms are small (145–195 sq ft).",
+  reviews:"strong", reviewCount:"297",
+  couple:{s:"yes", t:"Cleartrip: unmarried couples allowed. Brevistay: couples 18+ on local/outstation ID.", basis:"explicit"},
+  localId:{s:"yes", t:"Brevistay: local/outstation ID accepted for couples 18+.", basis:"explicit"}, ids:"Minimum age 18 (IHG).",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"≈ 3 km.", near:false}, metro:{t:"Not verified; ≈ 6-min walk to Yesvantpur Junction railway.", near:null},
+  hub:"Yesvantpur Junction ≈ 6-min walk.", airport:"KIA-10 via Yeshwanthpur TTMC.", room:"Small standard rooms.",
+  conf:"MEDIUM", call:false, notes:["Roughly double your budget. Shown only as the ‘predictable’ fallback."], sources:["ihgHIE","ctHIE","trvHIE"] },
+
+{ id:"istay", group:"avoid", label:"Avoid: hygiene complaints",
+  name:"Istay Hotels Rajajinagar", aka:"",
+  area:"5th Main, West of Chord Rd, Rajajinagar", maps:"Istay Hotels Rajajinagar Bangalore",
+  band:"gt2000", night:[2709,2709], priceNote:"Hotels.com: ₹2,580 (₹2,709 incl. taxes) for a July night; ₹1,600–2,000 in earlier snapshots.",
+  taxes:"≈ ₹129 (Hotels.com)", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[["Hotels.com","5.8/10","10"],["MakeMyTrip","3.4/5","1,036"],["Goibibo","3.5/5","1,519"],["ixigo","6.5/10","911"]],
+  ratingOther:"Recent complaints: no hot water, no towels (Hotels.com); a May 2026 couple review mentioned bed bugs and a door without a lock (earlier research).",
+  reviews:"weak", reviewCount:"≈1,000+",
+  couple:{s:"yes", t:"Goibibo ‘Couple Friendly’ tag (earlier research).", basis:"explicit"},
+  localId:{s:"unknown", t:"Not found.", basis:"none"}, ids:"Not confirmed.",
+  visitor:{s:"unknown", t:"Not stated."}, visitorReg:"Unknown.",
+  iskcon:{t:"≈ 1.2 km (Tripadvisor).", near:true}, metro:{t:"≈ 0.5 km from Rajajinagar Station (Hotels.com).", near:true},
+  hub:"Rajajinagar.", airport:"Rajajinagar ≈ 34 km.", room:"‘Quite tiny’ (Aug 2026 review, earlier research).",
+  conf:"MEDIUM", call:false, notes:["Great location, but the hygiene complaints are recent and repeated."], sources:["hcShoba","ixIstay","mmtIstay"] },
+
+{ id:"grandbee", group:"avoid", label:"Avoid: smell and noise",
+  name:"Hotel Grand Bee, Yeshwanthpur Junction", aka:"",
+  area:"Yeshwanthpur Junction", maps:"Hotel Grand Bee Yeshwanthpur Bangalore",
+  band:"mid", night:null, priceNote:"≈ ₹1,663 on Tripadvisor (earlier snapshot).",
+  taxes:"Unknown", cancel:"Not confirmed.", cancelFree:"unknown",
+  checkin:"Not confirmed", checkout:"Not confirmed",
+  ratings:[], ratingOther:"Reviews repeatedly mention a fish/chicken market next door with bad smells, train noise and dirty linen.",
+  reviews:"weak", reviewCount:"—",
+  couple:{s:"unknown", t:"Not checked.", basis:"none"}, localId:{s:"unknown", t:"Not checked.", basis:"none"}, ids:"—",
+  visitor:{s:"unknown", t:"—"}, visitorReg:"—",
+  iskcon:{t:"≈ 1 mile (Expedia).", near:true}, metro:{t:"Not verified.", near:null},
+  hub:"Yeshwanthpur Junction.", airport:"—", room:"—",
+  conf:"MEDIUM", call:false, notes:["Location complaints can't be fixed by a room upgrade."], sources:["exBee","taBee"] },
+
+{ id:"yatri", group:"avoid", label:"Not applicable: unmarried couples not allowed",
+  name:"Yatri Nivas (ISKCON guest house)", aka:"Inside the temple complex",
+  area:"Hare Krishna Hill, Rajajinagar", maps:"ISKCON Yatri Nivas Bangalore",
+  band:"gt2000", night:[3360,4032], priceNote:"Non-member double: ₹3,360 (non-AC) / ₹4,032 (AC), includes a 20% refundable deposit (Yatradham listing).",
+  taxes:"—", cancel:"—", cancelFree:"unknown",
+  checkin:"24/7 (guest-house site)", checkout:"Not confirmed",
+  ratings:[], ratingOther:"",
+  reviews:"insufficient", reviewCount:"—",
+  couple:{s:"no", t:"Unmarried couples not allowed (Yatradham booking terms).", basis:"explicit"},
+  localId:{s:"no", t:"Guests from the same city not allowed (Yatradham booking terms).", basis:"explicit"}, ids:"Aadhaar/DL/PAN/passport/voter ID listed.",
+  visitor:{s:"unknown", t:"—"}, visitorReg:"—",
+  iskcon:{t:"Inside the complex.", near:true}, metro:{t:"Not verified.", near:null},
+  hub:"—", airport:"—", room:"—",
+  conf:"HIGH", call:false, notes:["Excluded by its own terms."], sources:["ydYatri","iskGH"] }
+];
+
+const GROUPS = [
+  ["fit","Fits the brief (pending a phone call)","b-green","Budget ₹1,000–2,000, explicit couple + local-ID wording, and a good score on a large review count."],
+  ["caution","In budget or close, but flagged","b-amber","Conflicting reviews, conflicting ID policy, or thinner evidence."],
+  ["weak","Weak or missing evidence","b-grey","Cheap, or policy listed, but reviews are weak or absent. Several were reported by ChatGPT and not re-verified."],
+  ["over","Over budget alternatives","b-blue","Only if the real Oct 2–5 total fits, or you decide location is worth more."],
+  ["avoid","Avoid / not applicable","b-red","Recent hygiene or location complaints, or the hotel's own terms exclude you."]
+];
+
+const REVIEW_LABEL = {
+  strong:["Strong","b-green"], good1:["Good (one platform)","b-green"], mixedgood:["Mostly good, varies","b-amber"],
+  conflict:["Conflicting","b-red"], moderate:["Moderate","b-amber"], weak:["Weak","b-red"], insufficient:["Not enough","b-grey"]
+};
+const STATUS = {
+  yes:["Listed","b-green"], no:["No","b-red"], conflict:["Sources disagree","b-red"], unknown:["Unknown","b-grey"]
+};
+const BASIS = { explicit:"Source states it", reported:"Reported by ChatGPT, not re-verified", inferred:"My inference", none:"No source" };
+const CONF = { HIGH:"b-green", MEDIUM:"b-amber", LOW:"b-red" };
+const BAND = { lt1500:"Under ₹1,500", mid:"₹1,500–2,000", gt2000:"Over ₹2,000", unknown:"Needs confirmation" };
+
+function nightText(h){
+  if (!h.night) return "Needs confirmation";
+  const [a,b] = h.night;
+  return (a===b ? "≈ " + inr(a) : "≈ " + inr(a) + "–" + inr(b).replace("₹","")) ;
+}
+function totalText(h){
+  if (!h.night) return "Needs confirmation";
+  const [a,b] = h.night;
+  return (a===b ? "≈ " + inr(a*3) : "≈ " + inr(a*3) + "–" + inr(b*3).replace("₹",""));
+}
+function badge(pair, extra){ return `<span class="badge ${pair[1]}">${esc(pair[0])}${extra?esc(extra):""}</span>`; }
+function topRating(h){ return h.ratings.length ? h.ratings[0][0] + " " + h.ratings[0][1] : "—"; }
+
+/* requirement logic */
+function goodReviews(h){ return ["strong","good1"].includes(h.reviews); }
+function passesExceptVisitor(h){
+  return ["lt1500","mid"].includes(h.band) && goodReviews(h)
+    && h.couple.s==="yes" && h.couple.basis==="explicit"
+    && h.localId.s==="yes" && h.localId.basis==="explicit"
+    && !["avoid"].includes(h.group);
+}
+function passesAll(h){ return passesExceptVisitor(h) && h.visitor.s==="yes"; }
+
+/* ============================ table ============================ */
+let relaxed = false;
+function activeFilters(){ return [...document.querySelectorAll("#filters input:checked")].map(i=>i.value); }
+function matchFilter(h,f){
+  switch(f){
+    case "lt1500": return h.band==="lt1500";
+    case "mid": return h.band==="mid";
+    case "gt2000": return h.band==="gt2000";
+    case "couple": return h.couple.s==="yes";
+    case "localid": return h.localId.s==="yes";
+    case "cancel": return ["advertised","select"].includes(h.cancelFree);
+    case "iskcon": return h.iskcon.near===true;
+    case "metro": return h.metro.near===true;
+    case "reviews": return goodReviews(h);
+  }
+  return true;
+}
+function renderTable(){
+  const fs = activeFilters();
+  const bandFs = fs.filter(f=>["lt1500","mid","gt2000"].includes(f));
+  const otherFs = fs.filter(f=>!bandFs.includes(f));
+  const meetsAll = $("#meetsAll").checked;
+  let rows = hotels.filter(h =>
+    (bandFs.length===0 || bandFs.some(f=>matchFilter(h,f))) && otherFs.every(f=>matchFilter(h,f)));
+  const empty = $("#emptyMsg");
+  empty.innerHTML = "";
+  if (meetsAll){
+    const strict = rows.filter(passesAll);
+    if (strict.length===0 && !relaxed){
+      empty.innerHTML = `<div class="empty"><b>No hotel meets all your requirements yet.</b> Not one of them states whether a day visitor can come to your room, so the visitor requirement can only be met by calling. <br><button type="button" id="relaxBtn" style="margin-top:8px">Show hotels that pass everything except the visitor policy</button></div>`;
+      $("#relaxBtn").addEventListener("click",()=>{relaxed=true;renderTable();});
+      rows = [];
+    } else if (relaxed){
+      rows = rows.filter(passesExceptVisitor);
+      empty.innerHTML = `<div class="empty">Showing hotels that pass everything <b>except</b> the visitor policy, which still needs a phone call. <button type="button" id="strictBtn">Back to strict</button></div>`;
+      $("#strictBtn").addEventListener("click",()=>{relaxed=false;renderTable();});
+    } else rows = strict;
+  }
+  $("#count").textContent = `${rows.length} of ${hotels.length} hotels shown. Prices checked ${CHECKED}.`;
+  $("#hotelRows").innerHTML = rows.map(h => `
+    <tr>
+      <td><a class="hname" href="#h-${h.id}">${esc(h.name)}</a>${h.call?'<br><span class="badge b-red" style="margin-top:4px">Call first</span>':""}</td>
+      <td>${esc(h.area)}</td>
+      <td>${esc(nightText(h))}<br><small class="muted">${esc(BAND[h.band])}${h.night?", indicative":""}</small></td>
+      <td>${esc(totalText(h))}</td>
+      <td>${esc(topRating(h))}<br>${badge(REVIEW_LABEL[h.reviews])}</td>
+      <td>${esc(h.reviewCount)}</td>
+      <td>${badge(STATUS[h.couple.s])}<br><small class="muted">${esc(BASIS[h.couple.basis])}</small></td>
+      <td>${badge(STATUS[h.localId.s])}<br><small class="muted">${esc(BASIS[h.localId.basis])}</small></td>
+      <td>${badge(STATUS[h.visitor.s])}</td>
+      <td>${esc(h.iskcon.t)}</td>
+      <td>${esc(h.metro.t)}</td>
+      <td>${esc(h.cancel)}</td>
+      <td>${badge([h.conf, CONF[h.conf]])}</td>
+    </tr>`).join("");
+}
+document.querySelectorAll("#filters input").forEach(i=>i.addEventListener("change",renderTable));
+$("#meetsAll").addEventListener("change",()=>{relaxed=false;renderTable();});
+$("#clearFilters").addEventListener("click",()=>{document.querySelectorAll("#filters input").forEach(i=>i.checked=false);$("#meetsAll").checked=false;relaxed=false;renderTable();});
+
+/* ============================ cards ============================ */
+function polRow(k, st, extra){
+  return `<div class="pol"><span class="k">${esc(k)}</span><span>${st}${extra?` <small class="muted">${esc(extra)}</small>`:""}</span></div>`;
+}
+function renderCards(){
+  $("#hotelCards").innerHTML = GROUPS.map(([g,title,cls,desc]) => {
+    const list = hotels.filter(h=>h.group===g);
+    return `<div class="group-title"><h3>${esc(title)}</h3><span class="badge ${cls}">${list.length} hotels</span></div>
+      <p class="small muted" style="margin-top:0">${esc(desc)}</p>
+      <div class="grid" style="gap:12px">${list.map(cardHTML).join("")}</div>`;
+  }).join("");
+}
+function cardHTML(h){
+  const ratings = h.ratings.length
+    ? h.ratings.map(r=>`<span class="rating">${esc(r[0])}: <b>${esc(r[1])}</b>${r[2]?` <span class="muted">(${esc(r[2])})</span>`:""}</span>`).join("")
+    : `<span class="rating muted">No score found</span>`;
+  return `<article class="hcard${h.group==="avoid"?" avoid":""}" id="h-${h.id}">
+    <div class="top">
+      <div>
+        <h3>${esc(h.name)}</h3>
+        <div class="small muted">${esc(h.area)}${h.aka?". "+esc(h.aka):""}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        ${h.call?'<span class="callflag">Call hotel before booking</span>':""}
+        ${badge(["Confidence: "+h.conf, CONF[h.conf]])}
+      </div>
+    </div>
+    <div class="tags">${badge([h.label, h.group==="avoid"?"b-red":(h.group==="fit"?"b-green":"b-grey")])} ${badge(REVIEW_LABEL[h.reviews], "")}</div>
+    <div class="cols">
+      <div>
+        <h4>Price (indicative — verify at checkout)</h4>
+        <dl class="kv">
+          <dt>Per night</dt><dd>${esc(nightText(h))}</dd>
+          <dt>3 nights</dt><dd>${esc(totalText(h))}</dd>
+          <dt>Taxes</dt><dd>${esc(h.taxes)}</dd>
+          <dt>Cancellation</dt><dd>${esc(h.cancel)}</dd>
+          <dt>Check-in / out</dt><dd>${esc(h.checkin)} / ${esc(h.checkout)}</dd>
+        </dl>
+        <p class="small muted" style="margin:.4rem 0 0">${esc(h.priceNote)}<br>Checked: ${esc(CHECKED)}</p>
+      </div>
+      <div>
+        <h4>Location</h4>
+        <dl class="kv">
+          <dt>ISKCON</dt><dd>${esc(h.iskcon.t)}</dd>
+          <dt>Metro</dt><dd>${esc(h.metro.t)}</dd>
+          <dt>Transit hub</dt><dd>${esc(h.hub)}</dd>
+          <dt>Airport</dt><dd>${esc(h.airport)}</dd>
+          <dt>Room</dt><dd>${esc(h.room)}</dd>
+        </dl>
+        <p class="small" style="margin:.4rem 0 0"><a href="${gm(h.maps)}" target="_blank" rel="noopener">Open in Google Maps</a></p>
+      </div>
+      <div>
+        <h4>Policies</h4>
+        <div class="policy">
+          ${polRow("Unmarried couples", badge(STATUS[h.couple.s]), h.couple.t)}
+          ${polRow("Local ID", badge(STATUS[h.localId.s]), h.localId.t)}
+          ${polRow("IDs accepted", esc(h.ids))}
+          ${polRow("Day visitor to room", badge(STATUS[h.visitor.s]), h.visitor.t)}
+          ${polRow("Visitor ID / register", esc(h.visitorReg))}
+          ${polRow("Basis", esc(BASIS[h.couple.basis]))}
+        </div>
+      </div>
+    </div>
+    <h4 style="margin-top:14px">Reviews by platform (kept separate)</h4>
+    <div class="ratings">${ratings}</div>
+    ${h.ratingOther?`<p class="small" style="margin:.5rem 0 0">${esc(h.ratingOther)}</p>`:""}
+    <p class="small muted" style="margin:.3rem 0 0">Reddit evidence unavailable in this research pass.</p>
+    <details style="margin-top:10px"><summary>Notes and sources</summary>
+      <ul class="tight small">${h.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+      <div class="srcs">${h.sources.length?srcLinks(h.sources):'<span class="muted">No source link available.</span>'}</div>
+    </details>
+  </article>`;
+}
+
+/* ============================ timelines ============================ */
+function stopHTML(s){
+  const cls = ["stop", s.opt?"optional":"", s.key?"interchange":""].join(" ");
+  const tags = (s.tags||[]).map(t=>badge(t)).join(" ");
+  const legs = (s.legs||[]).map(l=>`<a href="${esc(l[1])}" target="_blank" rel="noopener">${esc(l[0])}</a>`).join("");
+  return `<li class="${cls}"><span class="t">${esc(s.t)}</span><span class="dot" aria-hidden="true"></span>
+    <div class="body"><h4>${esc(s.title)} ${s.opt?badge(["Flexible / optional","b-grey"]):""} ${tags}</h4>
+    ${s.text?`<p class="small">${s.text}</p>`:""}
+    ${legs?`<div class="legs">${legs}</div>`:""}</div></li>`;
+}
+const fri = [
+  {t:"~07:30", title:"Reach Delhi Airport T1", text:"From Gurgaon/Delhi, leaving early morning.", key:true},
+  {t:"09:30", title:"IndiGo 6E 826 departs", text:"Non-stop DEL T1 → BLR T1. 7 kg cabin, 15 kg check-in. Seat 33A."},
+  {t:"12:25", title:"Land at Bengaluru T1", text:"Scheduled arrival."},
+  {t:"~13:00", title:"Leave the airport after baggage", text:"Cab: follow signs to the taxi/app pick-up zone. Bus: Vayu Vajra bay at the terminal.", tags:[["Estimate","b-amber"]]},
+  {t:"13:00–15:00", title:"Airport → hotel", text:"Cab ≈ 60–90 min to Rajajinagar. KIA-10 bus takes longer and runs every 30–60 min. Holiday traffic can change this.", tags:[["Estimate","b-amber"]],
+    legs:[["Airport → ISKCON (drive)", dir("Kempegowda International Airport Terminal 1","ISKCON Bangalore Rajajinagar","driving")]]},
+  {t:"~14:00–15:00", title:"Hotel check-in", text:"Not guaranteed. If your hotel's check-in time is 12 PM the room should be ready; confirm when you call. Carry original IDs for both of you.", key:true, tags:[["Estimate","b-amber"]]},
+  {t:"~16:30", title:"ISKCON Bangalore", text:"On public holidays the temple stays open through the afternoon. Official pages give closing as 8:00 PM or 8:20 PM. Allow 1–2 hours; wear traditional or formal clothes, no shorts. Expect holiday crowds.",
+    legs:[["ISKCON on Maps", gm("ISKCON Sri Radha Krishna Temple Rajajinagar Bangalore")]]},
+  {t:"~19:00", title:"Evening aarti", text:"A travel blog lists 7:00 PM as the evening aarti. Not confirmed by ISKCON; ask at the temple.", opt:true},
+  {t:"After darshan", title:"Orion Mall / Brigade Gateway", text:"Next to the temple. Easy walk around after darshan.", opt:true,
+    legs:[["ISKCON → Orion Mall (walk)", dir("ISKCON Bangalore Rajajinagar","Orion Mall Bangalore","walking")]]},
+  {t:"Dinner", title:"Dinner nearby", text:"Hotel Nalapaka (North Karnataka) or Krishna Sagar (cheap thali-style veg). See the food guide. Nothing opens late for alcohol: Gandhi Jayanti is typically a dry day.",
+    legs:[["Hotel Nalapaka on Maps", gm("Hotel Nalapaka Rajajinagar Bangalore")]]}
+];
+const sat = [
+  {t:"07:30–08:30", title:"Breakfast in Malleshwaram", text:"Pick one: <b>CTR</b> for benne masala dosa (reported waits of 40–45 min), <b>Veena Stores</b> for idli and vada, or <b>Sri Raghavendra Stores</b> for a quick standing breakfast. Arrive early; weekend queues are long.", key:true,
+    legs:[["CTR", gm("CTR Shri Sagar Malleshwaram")],["Veena Stores", gm("Veena Stores Malleshwaram")],["Sri Raghavendra Stores", gm("Sri Raghavendra Stores Malleshwaram")]]},
+  {t:"~09:00", title:"Kadu Malleswara Temple and Nandi Tirtha", text:"The temple that gave Malleshwaram its name, and the excavated underground Nandi Tirtha temple close by. Both free.",
+    legs:[["CTR → Kadu Malleswara (walk)", dir("CTR Shri Sagar Malleshwaram","Kadu Malleshwara Temple Bangalore","walking")]]},
+  {t:"~10:00", title:"8th Cross market and street art", text:"Wander the market and the heritage murals in the back lanes.", opt:true,
+    legs:[["Temple → 8th Cross (walk)", dir("Kadu Malleshwara Temple Bangalore","8th Cross Malleshwaram Bangalore","walking")]]},
+  {t:"~11:00", title:"Sankey Tank", text:"Lake built in 1882; a pleasant walking path.",
+    legs:[["8th Cross → Sankey Tank (walk)", dir("8th Cross Malleshwaram Bangalore","Sankey Tank Bangalore","walking")]]},
+  {t:"12:30–13:30", title:"Lunch at Halli Mane", text:"Village-style Karnataka food: akki rotti, ragi rotti, plate meals. Weekend queues reported.", key:true,
+    legs:[["Sankey Tank → Halli Mane", dir("Sankey Tank Bangalore","Halli Mane Sampige Road Malleshwaram","driving")]]},
+  {t:"14:30–17:00", title:"Bangalore Palace", text:"Open 10 AM–5:30 PM. Entry ≈ ₹240 for Indians; phone-camera use is charged extra (≈ ₹285–300). Allow 2–3 hours. Short cab or auto from Malleshwaram.",
+    legs:[["Halli Mane → Palace", dir("Halli Mane Sampige Road Malleshwaram","Bangalore Palace","driving")]]},
+  {t:"Evening", title:"Sri Sairam's Chats, or back towards ISKCON", text:"Chaat in Malleshwaram (opens around 1 PM per reviews), or rest and walk around Orion Mall.", opt:true,
+    legs:[["Palace → Sairam's Chats", dir("Bangalore Palace","Sri Sairam's Chats Malleshwaram","driving")],["Palace → ISKCON", dir("Bangalore Palace","ISKCON Bangalore Rajajinagar","driving")]]}
+];
+const sun = [
+  {t:"~08:00", title:"Cubbon Park", text:"Early-morning walk; the bamboo grove and the State Central Library are inside the park. Metro: Green Line to Majestic, change to the Purple Line for Cubbon Park or Vidhana Soudha.", key:true,
+    legs:[["ISKCON → Cubbon Park (transit)", dir("ISKCON Bangalore Rajajinagar","Cubbon Park Bangalore","transit")]]},
+  {t:"~09:30", title:"Vidhana Soudha and High Court (outside)", text:"Viewed from outside, next to the park.",
+    legs:[["Cubbon Park → Vidhana Soudha (walk)", dir("Cubbon Park Bangalore","Vidhana Soudha Bangalore","walking")]]},
+  {t:"~11:00", title:"Vidyarthi Bhavan, Basavanagudi", text:"Famous dosa since 1943; waits of around 40 minutes are reported. Only worth the trip because you're combining it with the other Basavanagudi stops. Check hours before going.", opt:true,
+    legs:[["Vidhana Soudha → Vidyarthi Bhavan", dir("Vidhana Soudha Bangalore","Vidyarthi Bhavan Gandhi Bazaar Bangalore","transit")]]},
+  {t:"~12:30", title:"Bull Temple (Dodda Basavana Gudi)", text:"Short walk from Gandhi Bazaar.", opt:true,
+    legs:[["Vidyarthi Bhavan → Bull Temple (walk)", dir("Vidyarthi Bhavan Gandhi Bazaar Bangalore","Dodda Basavana Gudi Bull Temple Bangalore","walking")]]},
+  {t:"Afternoon", title:"Lalbagh", text:"Only if you still have energy. Otherwise go back and rest.", opt:true,
+    legs:[["Bull Temple → Lalbagh", dir("Dodda Basavana Gudi Bull Temple Bangalore","Lalbagh Botanical Garden Bangalore","driving")]]},
+  {t:"Evening", title:"Second ISKCON visit", text:"Quieter than the Friday holiday. Weekend timings: open through the day, closing 8:00–8:20 PM per official pages.", opt:true,
+    legs:[["Lalbagh → ISKCON", dir("Lalbagh Botanical Garden Bangalore","ISKCON Bangalore Rajajinagar","driving")]]},
+  {t:"Night", title:"Pack for Monday", text:"Checkout time depends on the hotel (10 AM–12 PM). Return flight not booked yet; see Airport transport.", key:true}
+];
+$("#friLine").innerHTML = fri.map(stopHTML).join("");
+$("#satLine").innerHTML = sat.map(stopHTML).join("");
+$("#sunLine").innerHTML = sun.map(stopHTML).join("");
+
+/* ============================ food ============================ */
+const food = {
+  "Malleshwaram": [
+    {n:"CTR (Shri Sagar)", type:"Veg tiffin, South Indian", when:"Breakfast", price:"Budget (my estimate)", order:"Benne masala dosa, filter coffee",
+     loc:"7th Cross corner of Margosa Rd, opposite Malleshwaram Grounds",
+     notes:"Award-winning benne masala dosa (Times Food Guide). Review summaries: usually 40–45 min waits; some say the dosa is smaller than before or greasy; parking is hard.",
+     caveat:"Arrive before 8 AM on Saturday.", src:["ctrWiki","ctrWl","ctrTa"], q:"CTR Shri Sagar Malleshwaram"},
+    {n:"Veena Stores", type:"Veg tiffin, South Indian", when:"Breakfast", price:"Budget (reviews say very affordable)", order:"Idli, vada, khara bath, bisibele bath",
+     loc:"Malleshwaram", notes:"Since 1977; recently renovated, with self-order kiosks. Long waits reported. One food blogger later called it a little overrated but better than a regular darshini.",
+     caveat:"Mostly standing/quick service.", src:["veena","idliBlog"], q:"Veena Stores Malleshwaram"},
+    {n:"Sri Raghavendra Stores", type:"Veg tiffin, standing only", when:"Breakfast", price:"Budget", order:"Vada, chow chow bath, shavige bath, coffee",
+     loc:"Right outside Malleshwaram railway station", notes:"Iconic value breakfast. Some reviewers say taste has dropped and prices went up over the past two years.",
+     caveat:"No seating.", src:["ragh"], q:"Sri Raghavendra Stores Malleshwaram"},
+    {n:"Halli Mane", type:"Veg Karnataka meals", when:"Lunch", price:"Budget to mid (my estimate)", order:"Akki rotti, ragi rotti with butter, plate meals, holige",
+     loc:"3rd Cross, Sampige Rd", notes:"Rustic village-house setting. Long weekend queues and limited parking reported; staff generally praised.",
+     caveat:"Go before 12:30 on Saturday.", src:["halli","halli2"], q:"Halli Mane Sampige Road Malleshwaram"},
+    {n:"Sri Sairam's Chats", type:"Veg chaat and juice", when:"Evening", price:"Budget (reviews say reasonable)", order:"Disco masala, dahi puri, pani puri",
+     loc:"Malleshwaram", notes:"Around 100 chaat varieties. Opens around 1 PM per reviews. Some find the masala puri just OK.",
+     caveat:"Busy after school hours.", src:["sairam"], q:"Sri Sairam's Chats Malleshwaram"},
+    {n:"Hotel Janatha", type:"Veg tiffin", when:"Breakfast", price:"Budget", order:"Masala dosa, sambar-dipped vada, goli baje, coffee",
+     loc:"8th Cross, Malleshwaram", notes:"An old-Bengaluru alternative to CTR. Recent reviews say seating and service have shrunk and they push takeaway; cleanliness could be better.",
+     caveat:"Consider it a backup if CTR's queue is too long.", src:["janatha"], q:"Hotel Janatha 8th Cross Malleshwaram"}
+  ],
+  "Rajajinagar / ISKCON": [
+    {n:"Krishna Sagar", type:"Veg, South Indian", when:"Lunch / breakfast", price:"One reviewer: ₹80–100 feeds two", order:"Lunch thali, idli, dosa, coffee",
+     loc:"Rajajinagar 1st Block, near the ISKCON complex", notes:"Local favourite for home-style food at low prices. Small and crowded; one reviewer rated cleanliness below average.",
+     caveat:"Expect to share tables.", src:["ksagar"], q:"Krishna Sagar Restaurant Rajajinagar"},
+    {n:"Hotel Nalapaka", type:"Veg, North Karnataka", when:"Lunch / dinner", price:"Mid (Tripadvisor: ₹₹–₹₹₹)", order:"Jowar roti meals, North Karnataka dishes",
+     loc:"Rajajinagar, near Rajajinagar Metro", notes:"Tripadvisor diners highlight the traditional North Karnataka menu.",
+     caveat:"Rating/hours not verified in this pass.", src:["taRaj"], q:"Hotel Nalapaka Rajajinagar"},
+    {n:"Hotel Kadamba", type:"Veg, South Indian", when:"Breakfast", price:"Budget to mid (my estimate)", order:"Breakfast tiffin",
+     loc:"Rajajinagar", notes:"Tripadvisor reviewers call it one of the city's best authentic breakfasts.",
+     caveat:"Rating/hours not verified.", src:["taRaj"], q:"Hotel Kadamba Veg Rajajinagar"},
+    {n:"Empire Restaurant", type:"Non-veg, Kerala/Mughlai", when:"Dinner", price:"Mid (my estimate)", order:"Kerala parotta with chicken, chicken kebab",
+     loc:"Rajajinagar", notes:"Non-veg option; Tripadvisor reviewers recommend the parotta and chicken dishes.",
+     caveat:"Only if you want non-veg.", src:["taRaj"], q:"Empire Restaurant Rajajinagar"}
+  ],
+  "Basavanagudi": [
+    {n:"Vidyarthi Bhavan", type:"Veg tiffin", when:"Breakfast / brunch", price:"Budget (my estimate)", order:"Masala dosa, khara bath, kesari bath, filter coffee",
+     loc:"Gandhi Bazaar, Basavanagudi", notes:"Iconic since 1943. Reviews mention ~40-minute waits and very devoted service; some call the dosa overrated, others strongly disagree.",
+     caveat:"Only a destination when combined with Bull Temple / Lalbagh on Sunday. Check opening days before going.", src:["vbWl","vbWiki","sk"], q:"Vidyarthi Bhavan Gandhi Bazaar"}
+  ]
+};
+const foodAreas = Object.keys(food);
+function renderFood(area){
+  document.querySelectorAll("#foodTabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.area===area ? "true":"false"));
+  $("#foodPanel").innerHTML = food[area].map(f=>`
+    <div class="fcard">
+      <h3>${esc(f.n)}</h3>
+      <div class="meta">${badge([f.type,"b-green"])} ${badge([f.when,"b-blue"])} ${badge([f.price,"b-grey"])}</div>
+      <dl class="kv small">
+        <dt>Order</dt><dd>${esc(f.order)}</dd>
+        <dt>Where</dt><dd>${esc(f.loc)} · <a href="${gm(f.q)}" target="_blank" rel="noopener">Maps</a></dd>
+        <dt>Rating / hours</dt><dd>Not verified in this pass</dd>
+        <dt>Review-site notes</dt><dd>${esc(f.notes)}</dd>
+        <dt>Reddit</dt><dd class="muted">Reddit evidence unavailable in this research pass.</dd>
+        <dt>Caveat</dt><dd>${esc(f.caveat)}</dd>
+      </dl>
+      <div class="srcs">${srcLinks(f.src)}</div>
+    </div>`).join("");
+}
+$("#foodTabs").innerHTML = foodAreas.map(a=>`<button type="button" role="tab" data-area="${esc(a)}">${esc(a)} (${food[a].length})</button>`).join("");
+document.querySelectorAll("#foodTabs button").forEach(b=>b.addEventListener("click",()=>renderFood(b.dataset.area)));
+renderFood(foodAreas[0]);
+
+/* ============================ places ============================ */
+const places = [
+  {n:"ISKCON Bangalore (Hare Krishna Hill)", area:"Rajajinagar", cost:"Free entry; small footwear/parking charges",
+   text:"Weekdays: 4:30–5:20 AM, 7:15 AM–1:15 PM, 4:15–8:00 PM. Weekends and public holidays: open through the day until 8:00 or 8:20 PM (official pages differ). Allow 1–2 hours. Traditional/formal clothes. Reviewers recommend the free khichdi prasadam.", src:["iskTime","iskTime2","iskReview"], q:"ISKCON Sri Radha Krishna Temple Rajajinagar"},
+  {n:"Kadu Malleswara Temple", area:"Malleshwaram", cost:"Free",
+   text:"The Shiva temple that gave Malleshwaram its name; built by Venkoji Rao Bhosle, Shivaji's brother.", src:["walk"], q:"Kadu Malleshwara Temple Bangalore"},
+  {n:"Nandi Tirtha (Dakshinamukha Nandi Tirtha Kalyani Kshetra)", area:"Malleshwaram", cost:"Free",
+   text:"An underground temple rediscovered by excavation, with a water feature and a temple tank. Close to Kadu Malleswara.", src:["walk","walk2"], q:"Dakshinamukha Nandi Tirtha Kalyani Kshetra Malleshwaram"},
+  {n:"Sankey Tank", area:"Malleshwaram", cost:"Free walking path",
+   text:"Built in 1882 by the Madras Sappers; popular with walkers and joggers.", src:["walk"], q:"Sankey Tank Bangalore"},
+  {n:"Bangalore Palace", area:"Vasanth Nagar", cost:"≈ ₹240 (Indians); phone camera extra",
+   text:"Open 10 AM–5:30 PM. Tudor-style palace; allow 2–3 hours. Some sources say it's closed on Mondays.", src:["palace","palaceCam"], q:"Bangalore Palace"},
+  {n:"Cubbon Park, Vidhana Soudha and High Court", area:"Central", cost:"Free",
+   text:"A local's pick for the bamboo grove and the State Central Library; the legislature and High Court sit next to it.", src:["sk"], q:"Cubbon Park Bangalore"},
+  {n:"Bull Temple and Gandhi Bazaar", area:"Basavanagudi", cost:"Free",
+   text:"Pair with Vidyarthi Bhavan on Sunday. Details not separately verified in this pass.", src:[], q:"Dodda Basavana Gudi Bull Temple Bangalore"},
+  {n:"Orion Mall / Brigade Gateway", area:"Next to ISKCON", cost:"Free",
+   text:"Easy evening option right beside the temple.", src:[], q:"Orion Mall Bangalore"}
+];
+$("#placeCards").innerHTML = places.map(p=>`<div class="panel">
+  <h3>${esc(p.n)}</h3>
+  <div class="meta" style="margin:6px 0">${badge([p.area,"b-purple"])} ${badge([p.cost,"b-grey"])}</div>
+  <p class="small">${esc(p.text)}</p>
+  <div class="srcs"><a href="${gm(p.q)}" target="_blank" rel="noopener">Open in Google Maps</a>${srcLinks(p.src)}</div>
+</div>`).join("");
+
+/* ============================ checklists ============================ */
+function renderChecklist(el, key, items){
+  const saved = store.get(key) || {};
+  el.innerHTML = items.map((it,i)=>`<li><label><input type="checkbox" data-i="${i}" ${saved[i]?"checked":""}><span>${esc(it[0])}${it[1]?`<small>${esc(it[1])}</small>`:""}</span></label></li>`).join("");
+  el.querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{
+    const s = store.get(key) || {}; s[inp.dataset.i] = inp.checked; store.set(key, s);
+  }));
+}
+renderChecklist($("#bookList"), "blr-booking", [
+  ["Open the live page for your chosen hotel with dates Oct 2 → Oct 5, 2 adults","Make sure it's an overnight rate, not an hourly/day-use slot."],
+  ["Note the full 3-night total including taxes","Your target is roughly ₹3,000–6,000."],
+  ["Confirm the free-cancellation deadline on the exact rate",""],
+  ["Read the 5 newest reviews on a second platform","Check for hot water, cleanliness, refusals at check-in."],
+  ["Call or WhatsApp the hotel with the script above","Couple, local ID, IDs accepted, day visitor, arrival time."],
+  ["Get the couple and local-ID answer in writing (WhatsApp)",""],
+  ["Book, then screenshot the confirmation and the hotel's phone number",""],
+  ["Pack original photo ID for both of you","Aadhaar, driving licence, passport or voter ID. Don't rely on PAN."],
+  ["Save a backup hotel",""]
+]);
+renderChecklist($("#decideList"), "blr-decide", [
+  ["Choose hotel","Starting points: Super Hotel O Thimmaiah Rd or Super Hotel O Ramachandrapuram."],
+  ["Verify couple / local-ID policy",""],
+  ["Verify female visitor policy","No hotel publishes this; only a call will tell you."],
+  ["Confirm exact Oct 2–5 total price",""],
+  ["Confirm cancellation deadline",""],
+  ["Decide airport bus vs cab",""],
+  ["Decide Sunday sightseeing","Cubbon Park only, or add Basavanagudi / Lalbagh."],
+  ["Book Monday return flight","Then enter the time in the Airport transport calculator."]
+]);
+
+/* ============================ calculator ============================ */
+$("#flightTime").addEventListener("input", e => {
+  const v = e.target.value;
+  const out = $("#calcOut");
+  if (!v){ out.innerHTML = '<span class="muted">No return flight entered yet.</span>'; return; }
+  const [h,m] = v.split(":").map(Number);
+  const mins = h*60+m;
+  const fmt = x => { x = (x+1440)%1440; return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0"); };
+  const cab = mins-180, bus = mins-210;
+  const early = cab < 0 || bus < 0 ? '<p class="small">That departure is very early; leaving the hotel would fall on Sunday night. Consider a later flight.</p>' : "";
+  out.innerHTML = `Leave the hotel by <b>${fmt(cab)}</b> by cab, or <b>${fmt(bus)}</b> by KIA bus. ${early}`;
+});
+
+/* ============================ copy script ============================ */
+$("#copyScript").addEventListener("click", async () => {
+  const text = [...document.querySelectorAll("#script li")].map((li,i)=>(i+1)+". "+li.textContent).join("\n");
+  const btn = $("#copyScript");
+  try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+  catch(e){ btn.textContent = "Select the list to copy"; }
+  setTimeout(()=>btn.textContent="Copy script", 2000);
+});
+
+/* ============================ sources list ============================ */
+const SRC_GROUPS = [
+  ["Official hotel, temple and tourism sites", ["iskTime","iskTime2","iskGH","ihgHIE","palace","treeboGS"]],
+  ["Booking platforms", ["oyoThim","oyoCoupleRaj","oyoCoupleRaji","oyoFlagRaj","oyoRama","oyoLocalMal","oyoIskcon","bkYesh","agStay","mmtStay","fabRaj","fabBas","fabYesh","mmtGR","mmtGR2","yatraGR","emtGR","goiGR","hcShoba","hcShoba2","exShoba","hcFabGS","hcFabGS2","mmtOrr","mmtYeshInd","goiGalaxy","mmtIsnas","mmtSaarang","emtHabitat","bkKing","b2bKing","tripKing","mmtKing","agBloom","msBloom","tripBloom","mmtSaavees","ctHIE","trvHIE","ixIstay","mmtIstay","ydYatri"]],
+  ["Review aggregators and business listings (incl. Google-review summaries)", ["kayakA","kayakB","pohStay","tvShoba","jdKing","exBee","taBee","iskReview","ctrWl","ctrTa","veena","ragh","halli","halli2","sairam","janatha","ksagar","taRaj","vbWl"]],
+  ["Reddit / community discussions", []],
+  ["News, travel sites and blogs", ["oyoPolicy","ixVisit","quoraOyo","catAarti","palaceCam","walk","walk2","sk","vv","bmFare","bab","moovit","witty","taxi","metroAir","ctrWiki","idliBlog","vbWiki"]]
+];
+$("#sourceList").innerHTML = SRC_GROUPS.map(([t,keys])=>`<h3>${esc(t)}</h3>${keys.length?`<ul>${keys.map(k=>`<li><a href="${esc(S[k][1])}" target="_blank" rel="noopener">${esc(S[k][0])}</a></li>`).join("")}</ul>`:`<p class="small"><b>Reddit evidence unavailable in this research pass.</b> My search tools returned no Reddit threads for these hotels or restaurants. Search r/bangalore yourself for the hotel you shortlist before paying.</p>`}`).join("");
+
+/* ============================ map ============================ */
+const C = {hub:"#1C66AE", metro:"#1D7A4B", sight:"#B87A06", area:"#6B3FA0", food:"#AE2A20"};
+const pins = [
+  ["Bengaluru Airport (BLR) T1",13.1989,77.7068,"hub","Kempegowda International Airport Terminal 1"],
+  ["Majestic / KSR Bengaluru City station",12.9776,77.5713,"hub","KSR Bengaluru City railway station"],
+  ["ISKCON Bangalore / Hare Krishna Hill",13.0097,77.5510,"sight","ISKCON Sri Radha Krishna Temple Rajajinagar"],
+  ["Orion Mall / Brigade Gateway",13.0111,77.5550,"sight","Orion Mall Bangalore"],
+  ["Mahalakshmi Metro",13.0080,77.5486,"metro","Mahalakshmi metro station Bangalore"],
+  ["Sandal Soap Factory Metro",13.0148,77.5539,"metro","Sandal Soap Factory metro station"],
+  ["Yeshwanthpur Metro",13.0230,77.5500,"metro","Yeshwanthpur metro station"],
+  ["Rajajinagar Metro",12.9994,77.5497,"metro","Rajajinagar metro station"],
+  ["Rajajinagar",12.9910,77.5520,"area","Rajajinagar Bangalore"],
+  ["Nandini Layout",13.0137,77.5390,"area","Nandini Layout Bangalore"],
+  ["Yeshwanthpur",13.0260,77.5470,"area","Yeshwanthpur Bangalore"],
+  ["Laggere",13.0150,77.5170,"area","Laggere Bangalore"],
+  ["Basaveshwaranagar",12.9930,77.5395,"area","Basaveshwaranagar Bangalore"],
+  ["Navarang",12.9985,77.5535,"area","Navarang Theatre Rajajinagar"],
+  ["Malleshwaram (8th Cross)",13.0033,77.5710,"area","8th Cross Malleshwaram"],
+  ["Kadu Malleswara Temple",13.0054,77.5694,"sight","Kadu Malleshwara Temple Bangalore"],
+  ["Sankey Tank",13.0092,77.5747,"sight","Sankey Tank Bangalore"],
+  ["Bangalore Palace",12.9987,77.5921,"sight","Bangalore Palace"],
+  ["Cubbon Park",12.9763,77.5929,"sight","Cubbon Park Bangalore"],
+  ["Vidhana Soudha",12.9794,77.5907,"sight","Vidhana Soudha Bangalore"],
+  ["Basavanagudi (Bull Temple)",12.9426,77.5681,"sight","Dodda Basavana Gudi Bull Temple"],
+  ["Lalbagh",12.9507,77.5848,"sight","Lalbagh Botanical Garden"],
+  ["CTR, Malleshwaram",12.9990,77.5705,"food","CTR Shri Sagar Malleshwaram"],
+  ["Halli Mane, Sampige Rd",12.9960,77.5715,"food","Halli Mane Sampige Road Malleshwaram"],
+  ["Vidyarthi Bhavan",12.9450,77.5713,"food","Vidyarthi Bhavan Gandhi Bazaar"]
+];
+(function initMap(){
+  const fb = $("#mapFallback");
+  const fallback = () => {
+    $("#map").hidden = true; $("#fitCity").hidden = true; $("#fitAll").hidden = true;
+    fb.hidden = false;
+    fb.innerHTML = `<div class="panel"><p><b>The interactive map couldn't load</b> (it needs an internet connection). Here are the same places as Google Maps links:</p><ul class="tight">${pins.map(p=>`<li><a href="${gm(p[4])}" target="_blank" rel="noopener">${esc(p[0])}</a></li>`).join("")}</ul></div>`;
+  };
+  if (typeof L === "undefined") { fallback(); return; }
+  try {
+    const map = L.map("map", {scrollWheelZoom:false});
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:18, attribution:"&copy; OpenStreetMap contributors"}).addTo(map);
+    const markers = pins.map(([name,lat,lng,type,q]) =>
+      L.circleMarker([lat,lng], {radius: type==="area"?7:8, color:"#fff", weight:2, fillColor:C[type], fillOpacity:.95})
+        .bindPopup(`<b>${esc(name)}</b><br><small>Approximate pin</small><br><a href="${gm(q)}" target="_blank" rel="noopener">Open in Google Maps</a>`)
+        .addTo(map));
+    const city = L.latLngBounds(pins.filter(p=>p[0].indexOf("Airport")===-1).map(p=>[p[1],p[2]]));
+    const all = L.latLngBounds(pins.map(p=>[p[1],p[2]]));
+    map.fitBounds(city, {padding:[20,20]});
+    $("#fitCity").addEventListener("click",()=>map.fitBounds(L.latLngBounds([[12.985,77.535],[13.027,77.578]]),{padding:[20,20]}));
+    $("#fitAll").addEventListener("click",()=>map.fitBounds(all,{padding:[20,20]}));
+  } catch(e){ fallback(); }
+})();
+
+/* ============================ nav highlight ============================ */
+(function(){
+  const links = [...document.querySelectorAll(".side nav a")];
+  const map = new Map(links.map(a=>[a.getAttribute("href").slice(1), a]));
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if (en.isIntersecting){
+        links.forEach(l=>l.classList.remove("active"));
+        const a = map.get(en.target.id);
+        if (a){ a.classList.add("active"); if (window.innerWidth<=900) a.scrollIntoView({block:"nearest",inline:"center"}); }
+      }
+    });
+  }, {rootMargin:"-40% 0px -55% 0px"});
+  document.querySelectorAll("main section[id]").forEach(s=>obs.observe(s));
+})();
+
+renderTable();
+renderCards();
+</script>
+</body>
+</html>
